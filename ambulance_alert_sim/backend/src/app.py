@@ -107,6 +107,8 @@ def run_full_simulation(req: SimulationRequest):
                 "time_saved_steps": time_saved,
                 "improvement_percentage": pct_improvement
             },
+            "baseline_frames": baseline_frames,
+            "alert_frames": alert_frames,
             "timeline": {
                 "baseline": baseline_frames,
                 "alert": alert_frames
@@ -132,6 +134,8 @@ def run_micro_simulation(req: MicroSimulationRequest):
             },
             "metrics": results["metrics"],
             "gis_corridor": results["gis_corridor"],
+            "baseline_frames": results["baseline_frames"],
+            "alert_frames": results["alert_frames"],
             "timeline": {
                 "baseline": results["baseline_frames"],
                 "alert": results["alert_frames"]

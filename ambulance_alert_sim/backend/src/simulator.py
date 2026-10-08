@@ -54,8 +54,10 @@ def simulate_step_history(enable_alert: bool = True, H: int = H_default, alpha: 
         history.append({
             "step": time_step,
             "position": round(float(pos), 2),
+            "ambulance_pos": round(float(pos), 2),
             "density": [round(float(d), 3) for d in current_density],
-            "speed": round(float(speed), 3)
+            "speed": round(float(speed), 3),
+            "ambulance_speed": round(float(speed), 3)
         })
 
         pos += speed
@@ -65,8 +67,10 @@ def simulate_step_history(enable_alert: bool = True, H: int = H_default, alpha: 
     history.append({
         "step": time_step,
         "position": round(float(min(pos, n - 1)), 2),
+        "ambulance_pos": round(float(min(pos, n - 1)), 2),
         "density": [round(float(d), 3) for d in (effective_density_with_alert(base_density, n-1, H, alpha) if enable_alert else base_density)],
-        "speed": 0.0
+        "speed": 0.0,
+        "ambulance_speed": 0.0
     })
 
     return history, time_step

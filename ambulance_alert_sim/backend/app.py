@@ -1,15 +1,31 @@
-# backend/app.py
+# backend/src/app.py
+import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-from simulator import simulate_step_history, get_base_density
-from micro_simulator import run_microscopic_comparison, GIS_WAYPOINTS
-from v2x_simulator import run_v2x_comparison, DEFAULT_INTERSECTIONS, V2X_PROTOCOLS
-from config import N, H_default, alpha_default
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
+try:
+    from .simulator import simulate_step_history, get_base_density
+    from .micro_simulator import run_microscopic_comparison, GIS_WAYPOINTS
+    from .v2x_simulator import run_v2x_comparison, DEFAULT_INTERSECTIONS, V2X_PROTOCOLS
+    from .config import N, H_default, alpha_default
+    from .acoustic_detector import default_detector
+except (ImportError, ValueError):
+    from simulator import simulate_step_history, get_base_density
+    from micro_simulator import run_microscopic_comparison, GIS_WAYPOINTS
+    from v2x_simulator import run_v2x_comparison, DEFAULT_INTERSECTIONS, V2X_PROTOCOLS
+    from config import N, H_default, alpha_default
+    from acoustic_detector import default_detector
 
 app = FastAPI(
     title="Ambulance Alert Simulator Backend API",
-    version="2.2.0",
+    version="2.3.0",
     description="Computational Engine for Macroscopic, Microscopic IDM, and V2X Green Corridor Traffic Signal Preemption Simulation"
 )
 
@@ -91,6 +107,8 @@ def run_full_simulation(req: SimulationRequest):
                 "time_saved_steps": time_saved,
                 "improvement_percentage": pct_improvement
             },
+            "baseline_frames": baseline_frames,
+            "alert_frames": alert_frames,
             "timeline": {
                 "baseline": baseline_frames,
                 "alert": alert_frames
@@ -116,6 +134,8 @@ def run_micro_simulation(req: MicroSimulationRequest):
             },
             "metrics": results["metrics"],
             "gis_corridor": results["gis_corridor"],
+            "baseline_frames": results["baseline_frames"],
+            "alert_frames": results["alert_frames"],
             "timeline": {
                 "baseline": results["baseline_frames"],
                 "alert": results["alert_frames"]
@@ -179,5 +199,7 @@ def detect_emergency_approach(req: DetectionRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app:app", host="127.0.0.1", port=8000, reload=True)
-
+    host = os.getenv("HOST", "127.0.0.1")
+    port = int(os.getenv("PORT", 8000))
+    app_target = "src.app:app" if os.path.exists("src/app.py") else "app:app"
+    uvicorn.run(app_target, host=host, port=port, reload=True)

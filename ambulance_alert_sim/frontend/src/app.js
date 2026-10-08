@@ -178,45 +178,49 @@ function initRoadTrack(segmentCount) {
 
 function initChart() {
   const chartElem = document.getElementById('trajectoryChart');
-  if (!chartElem) return;
-  const ctx = chartElem.getContext('2d');
-  if (chartInstance) chartInstance.destroy();
+  if (!chartElem || typeof Chart === 'undefined') return;
+  try {
+    const ctx = chartElem.getContext('2d');
+    if (chartInstance) chartInstance.destroy();
 
-  chartInstance = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: [],
-      datasets: [
-        {
-          label: 'With Advance Alert',
-          borderColor: '#0284c7',
-          backgroundColor: 'rgba(2, 132, 199, 0.1)',
-          data: [],
-          tension: 0.1,
-          borderWidth: 2
-        },
-        {
-          label: 'Baseline (No Alert)',
-          borderColor: '#ef4444',
-          borderDash: [5, 5],
-          data: [],
-          tension: 0.1,
-          borderWidth: 2
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: { title: { display: true, text: 'Time Step', color: '#94a3b8' }, ticks: { color: '#94a3b8' } },
-        y: { title: { display: true, text: 'Position (Segments)', color: '#94a3b8' }, ticks: { color: '#94a3b8' } }
+    chartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [
+          {
+            label: 'With Advance Alert',
+            borderColor: '#0284c7',
+            backgroundColor: 'rgba(2, 132, 199, 0.1)',
+            data: [],
+            tension: 0.1,
+            borderWidth: 2
+          },
+          {
+            label: 'Baseline (No Alert)',
+            borderColor: '#ef4444',
+            borderDash: [5, 5],
+            data: [],
+            tension: 0.1,
+            borderWidth: 2
+          }
+        ]
       },
-      plugins: {
-        legend: { labels: { color: '#f8fafc' } }
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: { title: { display: true, text: 'Time Step', color: '#94a3b8' }, ticks: { color: '#94a3b8' } },
+          y: { title: { display: true, text: 'Position (Segments)', color: '#94a3b8' }, ticks: { color: '#94a3b8' } }
+        },
+        plugins: {
+          legend: { labels: { color: '#f8fafc' } }
+        }
       }
-    }
-  });
+    });
+  } catch (err) {
+    console.warn("Chart.js initialization deferred or failed:", err);
+  }
 }
 
 async function fetchAndStartSimulation() {
@@ -244,8 +248,8 @@ async function fetchAndStartSimulation() {
     if (!response.ok) throw new Error("Simulation calculation failed");
 
     const data = await response.json();
-    baselineFrames = data.baseline_frames;
-    alertFrames = data.alert_frames;
+    baselineFrames = data.baseline_frames || (data.timeline && data.timeline.baseline) || [];
+    alertFrames = data.alert_frames || (data.timeline && data.timeline.alert) || [];
 
     document.getElementById("metric-baseline-time").innerText = `${data.metrics.baseline_time} steps`;
     document.getElementById("metric-alert-time").innerText = `${data.metrics.alert_time} steps`;
@@ -279,20 +283,24 @@ function renderMacroNextFrame() {
 
   if (currentFrame < alertFrames.length) {
     const fA = alertFrames[currentFrame];
+    const posA = (fA.ambulance_pos !== undefined) ? fA.ambulance_pos : (fA.position !== undefined ? fA.position : 0);
+    const spdA = (fA.ambulance_speed !== undefined) ? fA.ambulance_speed : (fA.speed !== undefined ? fA.speed : 0);
     updateCorridorUI(fA, "alert-seg-", document.getElementById("amb-alert"), N);
-    document.getElementById("lane-alert-status").innerText = `Pos: Seg ${fA.ambulance_pos} (Speed: ${fA.ambulance_speed.toFixed(2)})`;
-    if (chartInstance) {
+    document.getElementById("lane-alert-status").innerText = `Pos: Seg ${posA} (Speed: ${Number(spdA).toFixed(2)})`;
+    if (chartInstance && chartInstance.data) {
       chartInstance.data.labels.push(currentFrame);
-      chartInstance.data.datasets[0].data.push(fA.ambulance_pos);
+      chartInstance.data.datasets[0].data.push(posA);
     }
   }
 
   if (currentFrame < baselineFrames.length) {
     const fB = baselineFrames[currentFrame];
+    const posB = (fB.ambulance_pos !== undefined) ? fB.ambulance_pos : (fB.position !== undefined ? fB.position : 0);
+    const spdB = (fB.ambulance_speed !== undefined) ? fB.ambulance_speed : (fB.speed !== undefined ? fB.speed : 0);
     updateCorridorUI(fB, "base-seg-", document.getElementById("amb-base"), N);
-    document.getElementById("lane-base-status").innerText = `Pos: Seg ${fB.ambulance_pos} (Speed: ${fB.ambulance_speed.toFixed(2)})`;
-    if (chartInstance) {
-      chartInstance.data.datasets[1].data.push(fB.ambulance_pos);
+    document.getElementById("lane-base-status").innerText = `Pos: Seg ${posB} (Speed: ${Number(spdB).toFixed(2)})`;
+    if (chartInstance && chartInstance.data) {
+      chartInstance.data.datasets[1].data.push(posB);
     }
   }
 
@@ -301,16 +309,18 @@ function renderMacroNextFrame() {
 }
 
 function updateCorridorUI(frame, segPrefix, markerElem, N) {
+  if (!frame) return;
   for (let i = 0; i < N; i++) {
     const seg = document.getElementById(`${segPrefix}${i}`);
     if (!seg) continue;
-    const density = frame.density[i];
+    const density = (frame.density && frame.density[i] !== undefined) ? frame.density[i] : 0.5;
     const red = Math.floor(density * 220 + 20);
     const green = Math.floor((1 - density) * 180 + 20);
     seg.style.backgroundColor = `rgb(${red}, ${green}, 40)`;
   }
-  const pct = (frame.ambulance_pos / N) * 100;
-  markerElem.style.left = `calc(${pct}% - 13px)`;
+  const pos = (frame.ambulance_pos !== undefined) ? frame.ambulance_pos : (frame.position !== undefined ? frame.position : 0);
+  const pct = (pos / N) * 100;
+  if (markerElem) markerElem.style.left = `calc(${pct}% - 13px)`;
 }
 
 // ==================== MICROSCOPIC SIMULATION (PHASE 7) ====================
@@ -337,7 +347,7 @@ async function fetchAndStartMicroSimulation() {
 
     const data = await res.json();
     microMetrics = data.metrics;
-    microFrames = data.alert_frames || [];
+    microFrames = data.alert_frames || (data.timeline && data.timeline.alert) || [];
     microGisData = data.gis_corridor || [];
     microTotalSteps = microFrames.length;
     microCurrentFrame = 0;
@@ -519,7 +529,7 @@ async function fetchAndStartV2XSimulation() {
 
     const data = await res.json();
     v2xMetrics = data.metrics;
-    v2xFrames = data.alert_frames || [];
+    v2xFrames = data.alert_frames || (data.timeline && data.timeline.alert) || [];
     v2xTotalSteps = v2xFrames.length;
     v2xCurrentFrame = 0;
 
