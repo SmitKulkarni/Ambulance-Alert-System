@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart 4-Way Intersection Acoustic Siren Preemption (Cross-Traffic Audio Alert)</title>
+  <style>
+    :root {
+      --bg-main: #0b1120;
+      --bg-card: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-blue: #0284c7;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --emergency-blue: #00d4ff;
+      --border-line: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background: var(--bg-main);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      color: #38bdf8;
+      font-size: 1.55rem;
+      margin-bottom: 5px;
+    }
+
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 0.88rem;
+    }
+
+    .badge-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+      justify-content: center;
+    }
+
+    .badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-blue { background: rgba(0, 212, 255, 0.15); color: #00d4ff; border: 1px solid rgba(0, 212, 255, 0.4); }
+    .badge-sound { background: rgba(245, 158, 11, 0.18); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.5); }
+    .badge-primary { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); }
+    .badge-alert { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+
+    .main-layout {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      max-width: 1100px;
+      width: 100%;
+    }
+
+    .sim-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-line);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    }
+
+    .status-panel {
+      width: 100%;
+      background: #0f172a;
+      border: 1px solid var(--border-line);
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-bottom: 12px;
+      text-align: center;
+      font-size: 0.9rem;
+      font-weight: 600;
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s;
+    }
+
+    .status-panel.preemption-blue {
+      border-color: #00d4ff;
+      background: rgba(0, 212, 255, 0.14);
+      color: #67e8f9;
+      box-shadow: 0 0 18px rgba(0, 212, 255, 0.35);
+    }
+
+    canvas {
+      background: #1e293b;
+      border: 2px solid #334155;
+      border-radius: 10px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+      width: 500px;
+      height: 500px;
+    }
+
+    .controls-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-width: 320px;
+      max-width: 450px;
+      flex: 1;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-line);
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+
+    .card h3 {
+      font-size: 0.92rem;
+      color: #38bdf8;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    button {
+      background: var(--accent-blue);
+      color: white;
+      border: none;
+      padding: 9px 12px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:hover {
+      background: #0369a1;
+      transform: translateY(-1px);
+    }
+
+    button.btn-emergency {
+      background: #0284c7;
+      border: 1px solid #38bdf8;
+    }
+
+    button.btn-emergency:hover {
+      background: #0369a1;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+    }
+
+    button.btn-auto-active {
+      background: #059669;
+      border: 1px solid #34d399;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+    }
+
+    button.btn-auto-inactive {
+      background: #475569;
+      border: 1px solid #64748b;
+    }
+
+    button.btn-util {
+      background: #334155;
+    }
+
+    button.btn-util:hover {
+      background: #475569;
+    }
+
+    .slider-container {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 8px;
+      padding: 8px 10px;
+      background: #0f172a;
+      border-radius: 6px;
+      border: 1px solid #334155;
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: #cbd5e1;
+    }
+
+    .slider-header span.val {
+      font-weight: bold;
+      color: #00d4ff;
+    }
+
+    input[type=range] {
+      width: 100%;
+      accent-color: #00d4ff;
+      cursor: pointer;
+    }
+
+    .telemetry-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 0.82rem;
+    }
+
+    .telemetry-label {
+      color: var(--text-muted);
+    }
+
+    .telemetry-val {
+      font-weight: bold;
+      color: #f8fafc;
+    }
+
+    .telemetry-val.green { color: #34d399; }
+    .telemetry-val.red { color: #f87171; }
+    .telemetry-val.blue { color: #00d4ff; text-shadow: 0 0 8px rgba(0, 212, 255, 0.6); }
+    .telemetry-val.warn { color: #fbbf24; text-shadow: 0 0 6px rgba(245, 158, 11, 0.5); }
+    .telemetry-val.cyan { color: #38bdf8; }
+
+    .mic-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .mic-card {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 0.78rem;
+    }
+
+    .mic-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+      font-weight: 600;
+      color: #cbd5e1;
+    }
+
+    .mic-bar-bg {
+      background: #1e293b;
+      border-radius: 3px;
+      height: 6px;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .mic-bar-fill {
+      height: 100%;
+      width: 25%;
+      background: #38bdf8;
+      transition: width 0.1s linear, background 0.2s;
+    }
+
+    .mic-bar-fill.alert {
+      background: #00d4ff;
+      box-shadow: 0 0 8px #00d4ff;
+    }
+
+    .nav-back {
+      margin-top: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .nav-back a {
+      color: #38bdf8;
+      text-decoration: none;
+      font-size: 0.82rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .nav-back a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Acoustic Siren 4-Way Traffic Preemption (Cross-Traffic Audio Warning)</h1>
+    <p class="subtitle">When Signal Turns BLUE: Warning Buzzer & Voice Sound Alerts All Other Approaching Lanes & Pedestrians</p>
+    <div class="badge-bar">
+      <span class="badge badge-blue">4th Color: BLUE Siren Priority</span>
+      <span class="badge badge-sound">🔊 Cross-Traffic Warning Sound Active</span>
+      <span class="badge badge-alert">All 3 Other Sides: Solid Red</span>
+      <span class="badge badge-primary">Automatic Siren Detection</span>
+    </div>
+  </header>
+
+  <div class="main-layout">
+    <!-- Visualizer Canvas & Live Status -->
+    <div class="sim-card">
+      <div class="status-panel" id="status-panel">Normal Operation: Phase 1 (North Green alone • East/South/West Red)</div>
+      <canvas id="simCanvas" width="500" height="500"></canvas>
+    </div>
+
+    <!-- Interactive Control Panel & Telemetry -->
+    <div class="controls-panel">
+      <!-- Cross-Traffic Warning Sound & Controls -->
+      <div class="card">
+        <h3>📢 Cross-Traffic Warning & Audio Controls</h3>
+        <p style="font-size: 0.76rem; color: var(--text-muted); margin-bottom: 8px;">
+          When an approach turns <b>BLUE</b>, roadside warning horns <b>sound an audible alarm for the other 3 stopped directions</b> so drivers and pedestrians understand an emergency vehicle is passing.
+        </p>
+
+        <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+          <button id="btn-auto-patrol" class="btn-auto-active" onclick="toggleAutoPatrol()" style="flex: 1;">
+            🤖 Auto Siren Detection: ON
+          </button>
+          <button class="btn-util" id="btn-sound-toggle" onclick="toggleSound()" style="flex: 1;">
+            🔊 Audio Alerts: ON
+          </button>
+        </div>
+
+        <!-- Hold Duration & Pace Sliders -->
+        <div class="slider-container">
+          <div class="slider-header">
+            <span>Ambulance Signal Hold Duration</span>
+            <span class="val" id="val-hold-time">16 Seconds</span>
+          </div>
+          <input type="range" id="slider-hold-time" min="8" max="30" value="16" oninput="setHoldDuration(this.value)">
+        </div>
+
+        <p style="font-size: 0.74rem; color: #94a3b8; margin: 8px 0 6px 0;">Manual Approach Dispatch:</p>
+        <div class="btn-grid">
+          <button class="btn-emergency" onclick="dispatchAmbulance('West')">🚑 Sound from West</button>
+          <button class="btn-emergency" onclick="dispatchAmbulance('South')">🚑 Sound from South</button>
+          <button class="btn-emergency" onclick="dispatchAmbulance('East')">🚑 Sound from East</button>
+          <button class="btn-emergency" onclick="dispatchAmbulance('North')">🚑 Sound from North</button>
+        </div>
+        <div style="margin-top: 8px;">
+          <button class="btn-util" onclick="resetSimulation()" style="width: 100%;">🔄 Reset Intersection</button>
+        </div>
+      </div>
+
+      <!-- Real-Time Telemetry -->
+      <div class="card">
+        <h3>📊 Real-Time Preemption Telemetry</h3>
+        <div class="telemetry-row">
+          <span class="telemetry-label">Active Signal Phase</span>
+          <span class="telemetry-val green" id="tele-phase">North Green (Others Red)</span>
+        </div>
+        <div class="telemetry-row">
+          <span class="telemetry-label">Preemption Mode</span>
+          <span class="telemetry-val" id="tele-mode">Normal Cycle</span>
+        </div>
+        <div class="telemetry-row">
+          <span class="telemetry-label">Emergency Priority Light</span>
+          <span class="telemetry-val" id="tele-blue-dir">Inactive (None)</span>
+        </div>
+        <div class="telemetry-row">
+          <span class="telemetry-label">Cross-Traffic Warning Alarm</span>
+          <span class="telemetry-val" id="tele-warning-sound">Silent (Normal)</span>
+        </div>
+        <div class="telemetry-row">
+          <span class="telemetry-label">Signal Hold Countdown</span>
+          <span class="telemetry-val cyan" id="tele-hold-countdown">-- s</span>
+        </div>
+        <div class="telemetry-row">
+          <span class="telemetry-label">Auto-Detected Approach</span>
+          <span class="telemetry-val blue" id="tele-detected-dir">Scanning...</span>
+        </div>
+        <div class="telemetry-row">
+          <span class="telemetry-label">Detection Confidence</span>
+          <span class="telemetry-val green" id="tele-confidence">-- %</span>
+        </div>
+        <div class="telemetry-row">
+          <span class="telemetry-label">Halted Signals (Red)</span>
+          <span class="telemetry-val red" id="tele-stopped">None</span>
+        </div>
+        <div class="telemetry-row">
+          <span class="telemetry-label">Ambulance Distance</span>
+          <span class="telemetry-val" id="tele-dist">-- px</span>
+        </div>
+      </div>
+
+      <!-- Acoustic Directional Microphone Array -->
+      <div class="card">
+        <h3>🎤 Directional Acoustic Sensors (dB SPL)</h3>
+        <div class="mic-grid">
+          <div class="mic-card" id="card-mic-north">
+            <div class="mic-header">
+              <span>North Mic</span>
+              <span id="mic-val-north">38 dB</span>
+            </div>
+            <div class="mic-bar-bg"><div class="mic-bar-fill" id="mic-bar-north" style="width: 38%;"></div></div>
+          </div>
+          <div class="mic-card" id="card-mic-south">
+            <div class="mic-header">
+              <span>South Mic</span>
+              <span id="mic-val-south">40 dB</span>
+            </div>
+            <div class="mic-bar-bg"><div class="mic-bar-fill" id="mic-bar-south" style="width: 40%;"></div></div>
+          </div>
+          <div class="mic-card" id="card-mic-east">
+            <div class="mic-header">
+              <span>East Mic</span>
+              <span id="mic-val-east">39 dB</span>
+            </div>
+            <div class="mic-bar-bg"><div class="mic-bar-fill" id="mic-bar-east" style="width: 39%;"></div></div>
+          </div>
+          <div class="mic-card" id="card-mic-west">
+            <div class="mic-header">
+              <span>West Mic</span>
+              <span id="mic-val-west">42 dB</span>
+            </div>
+            <div class="mic-bar-bg"><div class="mic-bar-fill" id="mic-bar-west" style="width: 42%;"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-back">
+        <a href="index.html">← Return to Main Simulator Dashboard</a>
+        <a href="traffic_signal_preemption_guide.html" target="_blank">📄 View EVTSP Guide</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+    const statusPanel = document.getElementById('status-panel');
+
+    // Web Audio Synthesizer: Doppler Siren & Cross-Traffic Warning Alarm
+    let audioCtx = null;
+    let sirenOsc = null, sirenGain = null;
+    let warningBuzzerOsc = null, warningBuzzerGain = null;
+    let isSoundMuted = false;
+    let autoPatrol = true;
+    let autoPatrolTimer = 0;
+
+    let configuredHoldDurationSec = 16;
+    let configuredAmbSpeed = 1.4;
+    let activeHoldTicksRemaining = 0;
+
+    let normalPhase = 0;
+    let phaseTimer = 0;
+    const PHASE_GREEN_TICKS = 150;
+    const PHASE_YELLOW_TICKS = 45;
+
+    let preemption = false;
+    let approaching = null;
+    let savedPhase = 0;
+    let savedTimer = 0;
+
+    let amb = { active: false, x: 0, y: 0, vx: 0, vy: 0, dir: '', hasCrossedBox: false };
+
+    let acousticSensors = { North: 38, South: 40, East: 39, West: 42 };
+
+    let civilianCars = [
+      { id: 'c_north', dir: 'North', x: 235, y: 50,  vx: 0,    vy: 1.5, stopped: false },
+      { id: 'c_south', dir: 'South', x: 265, y: 450, vx: 0,    vy: -1.5, stopped: false },
+      { id: 'c_east',  dir: 'East',  x: 450, y: 235, vx: -1.5, vy: 0,   stopped: false },
+      { id: 'c_west',  dir: 'West',  x: 50,  y: 265, vx: 1.5,  vy: 0,   stopped: false }
+    ];
+
+    function setElemText(id, text, className) {
+      const elem = document.getElementById(id);
+      if (elem) {
+        elem.innerText = text;
+        if (className !== undefined) elem.className = className;
+      }
+    }
+
+    function setHoldDuration(val) {
+      configuredHoldDurationSec = parseInt(val, 10);
+      setElemText('val-hold-time', `${configuredHoldDurationSec} Seconds`);
+    }
+
+    function setAmbulanceSpeed(val) {
+      configuredAmbSpeed = parseFloat(val);
+      let desc = 'Steady Pace';
+      if (configuredAmbSpeed <= 1.0) desc = 'Slow/Careful';
+      else if (configuredAmbSpeed >= 2.0) desc = 'Fast Sprint';
+      setElemText('val-amb-speed', `${desc} (${configuredAmbSpeed} px/f)`);
+    }
+
+    function initAudio() {
+      if (audioCtx) return;
+      try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        // 1. Ambulance Doppler Siren (Sawtooth wail)
+        sirenOsc = audioCtx.createOscillator();
+        sirenGain = audioCtx.createGain();
+        sirenOsc.type = 'sawtooth';
+        sirenOsc.frequency.setValueAtTime(700, audioCtx.currentTime);
+        sirenGain.gain.setValueAtTime(0, audioCtx.currentTime);
+        sirenOsc.connect(sirenGain);
+        sirenGain.connect(audioCtx.destination);
+        sirenOsc.start();
+
+        // 2. Intersection Warning Alarm for Cross-Traffic (Square wave pulsating alert chime)
+        warningBuzzerOsc = audioCtx.createOscillator();
+        warningBuzzerGain = audioCtx.createGain();
+        warningBuzzerOsc.type = 'square';
+        warningBuzzerOsc.frequency.setValueAtTime(880, audioCtx.currentTime);
+        warningBuzzerGain.gain.setValueAtTime(0, audioCtx.currentTime);
+        warningBuzzerOsc.connect(warningBuzzerGain);
+        warningBuzzerGain.connect(audioCtx.destination);
+        warningBuzzerOsc.start();
+      } catch (e) {
+        console.warn('AudioContext waiting for user gesture:', e);
+      }
+    }
+
+    function toggleSound() {
+      initAudio();
+      isSoundMuted = !isSoundMuted;
+      const btn = document.getElementById('btn-sound-toggle');
+      if (btn) {
+        if (isSoundMuted) {
+          btn.innerText = '🔇 Audio Alerts: Muted';
+          btn.style.color = '#fca5a5';
+          if (sirenGain && audioCtx) sirenGain.gain.setValueAtTime(0, audioCtx.currentTime);
+          if (warningBuzzerGain && audioCtx) warningBuzzerGain.gain.setValueAtTime(0, audioCtx.currentTime);
+        } else {
+          btn.innerText = '🔊 Audio Alerts: ON';
+          btn.style.color = '#fff';
+        }
+      }
+    }
+
+    function toggleAutoPatrol() {
+      autoPatrol = !autoPatrol;
+      const btn = document.getElementById('btn-auto-patrol');
+      if (btn) {
+        if (autoPatrol) {
+          btn.innerText = '🤖 Auto Siren Detection: ON';
+          btn.className = 'btn-auto-active';
+          autoPatrolTimer = 100;
+        } else {
+          btn.innerText = '🤖 Auto Siren Detection: OFF';
+          btn.className = 'btn-auto-inactive';
+        }
+      }
+    }
+
+    // Voice announcement using SpeechSynthesis API
+    function speakEmergencyWarning(approach) {
+      if (isSoundMuted || !('speechSynthesis' in window)) return;
+      try {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(`Warning! Emergency vehicle arriving from ${approach}. All cross traffic halt.`);
+        utter.rate = 1.15;
+        utter.pitch = 1.05;
+        window.speechSynthesis.speak(utter);
+      } catch (e) {}
+    }
+
+    function resetSimulation() {
+      amb.active = false;
+      amb.hasCrossedBox = false;
+      preemption = false;
+      approaching = null;
+      activeHoldTicksRemaining = 0;
+      normalPhase = 0;
+      phaseTimer = 0;
+      if (audioCtx && sirenGain) sirenGain.gain.setValueAtTime(0, audioCtx.currentTime);
+      if (audioCtx && warningBuzzerGain) warningBuzzerGain.gain.setValueAtTime(0, audioCtx.currentTime);
+
+      civilianCars = [
+        { id: 'c_north', dir: 'North', x: 235, y: 50,  vx: 0,    vy: 1.5, stopped: false },
+        { id: 'c_south', dir: 'South', x: 265, y: 450, vx: 0,    vy: -1.5, stopped: false },
+        { id: 'c_east',  dir: 'East',  x: 450, y: 235, vx: -1.5, vy: 0,   stopped: false },
+        { id: 'c_west',  dir: 'West',  x: 50,  y: 265, vx: 1.5,  vy: 0,   stopped: false }
+      ];
+
+      acousticSensors = { North: 38, South: 40, East: 39, West: 42 };
+      updateMicUI();
+
+      if (statusPanel) {
+        statusPanel.innerHTML = 'Normal Operation: Phase 1 (North Green alone &bull; East/South/West Red)';
+        statusPanel.className = 'status-panel';
+      }
+      setElemText('tele-blue-dir', 'Inactive (None)', 'telemetry-val');
+      setElemText('tele-warning-sound', 'Silent (Normal)', 'telemetry-val');
+      setElemText('tele-stopped', 'None');
+      setElemText('tele-dist', '-- px');
+      setElemText('tele-hold-countdown', '-- s');
+      setElemText('tele-detected-dir', 'Scanning...');
+      setElemText('tele-confidence', '-- %');
+      setElemText('tele-mode', 'Normal Cycle (1 Green, 3 Red)', 'telemetry-val');
+    }
+
+    // ==================== DISPATCH AMBULANCE & TRIGGER WARNING AUDIO ====================
+    function dispatchAmbulance(direction) {
+      initAudio();
+
+      if (!preemption) {
+        savedPhase = normalPhase;
+        savedTimer = phaseTimer;
+      }
+
+      amb.active = true;
+      amb.dir = direction;
+      amb.hasCrossedBox = false;
+
+      activeHoldTicksRemaining = configuredHoldDurationSec * 60;
+
+      const spd = configuredAmbSpeed;
+      if (direction === 'West') {
+        amb.x = 20; amb.y = 265; amb.vx = spd; amb.vy = 0;
+      } else if (direction === 'South') {
+        amb.x = 265; amb.y = 480; amb.vx = 0; amb.vy = -spd;
+      } else if (direction === 'East') {
+        amb.x = 480; amb.y = 235; amb.vx = -spd; amb.vy = 0;
+      } else if (direction === 'North') {
+        amb.x = 235; amb.y = 20; amb.vx = 0; amb.vy = spd;
+      }
+
+      triggerAcousticPreemption(direction);
+    }
+
+    function triggerAcousticPreemption(direction) {
+      preemption = true;
+      approaching = direction;
+
+      acousticSensors[direction] = 96 + Math.floor(Math.random() * 4);
+      const others = ['North', 'South', 'East', 'West'].filter(d => d !== direction);
+      others.forEach(d => {
+        acousticSensors[d] = 40 + Math.floor(Math.random() * 8);
+      });
+      updateMicUI();
+
+      const stoppedDirs = others.join(', ');
+      const secs = (activeHoldTicksRemaining / 60).toFixed(1);
+      const conf = (98.0 + Math.random() * 1.8).toFixed(1);
+
+      speakEmergencyWarning(direction);
+
+      if (statusPanel) {
+        statusPanel.innerHTML = `🚨 <b>SIGNAL TURNED BLUE (${direction.toUpperCase()}) &bull; WARNING ALARM ACTIVE FOR OTHERS!</b><br>
+        📢 <b>Buzzer & Horn Warning Broadcasting on [${stoppedDirs}]</b> &bull; 🔴 ALL OTHER 3 MUST REMAIN STOPPED (${secs}s)`;
+        statusPanel.className = 'status-panel preemption-blue';
+      }
+
+      setElemText('tele-blue-dir', `${direction} (🔵 BLUE SIGNAL)`, 'telemetry-val blue');
+      setElemText('tele-warning-sound', `📢 ACTIVE (Warning ${stoppedDirs})`, 'telemetry-val warn');
+      setElemText('tele-detected-dir', `${direction} Approach (${acousticSensors[direction]} dB)`);
+      setElemText('tele-confidence', `${conf}%`);
+      setElemText('tele-stopped', stoppedDirs);
+      setElemText('tele-mode', 'BLUE PREEMPTION & WARNING ALARM ACTIVE', 'telemetry-val red');
+    }
+
+    function updateMicUI() {
+      ['north', 'south', 'east', 'west'].forEach(dirKey => {
+        const capitalized = dirKey.charAt(0).toUpperCase() + dirKey.slice(1);
+        const val = Math.min(100, Math.round(acousticSensors[capitalized]));
+        const textElem = document.getElementById(`mic-val-${dirKey}`);
+        const barElem = document.getElementById(`mic-bar-${dirKey}`);
+        if (textElem && barElem) {
+          textElem.innerText = `${val} dB`;
+          barElem.style.width = `${val}%`;
+          if (val >= 75) {
+            barElem.className = 'mic-bar-fill alert';
+            textElem.style.color = '#00d4ff';
+            textElem.style.fontWeight = 'bold';
+          } else {
+            barElem.className = 'mic-bar-fill';
+            textElem.style.color = '#cbd5e1';
+            textElem.style.fontWeight = 'normal';
+          }
+        }
+      });
+    }
+
+    function getSignalState(dir) {
+      if (preemption) {
+        if (dir === approaching) {
+          return { color: '#00d4ff', name: 'BLUE', isBlue: true };
+        } else {
+          return { color: '#ef4444', name: 'RED', isBlue: false };
+        }
+      }
+
+      let activeDir = '';
+      let isYellow = false;
+
+      if (normalPhase === 0) { activeDir = 'North'; isYellow = false; }
+      else if (normalPhase === 1) { activeDir = 'North'; isYellow = true; }
+      else if (normalPhase === 2) { activeDir = 'East';  isYellow = false; }
+      else if (normalPhase === 3) { activeDir = 'East';  isYellow = true; }
+      else if (normalPhase === 4) { activeDir = 'South'; isYellow = false; }
+      else if (normalPhase === 5) { activeDir = 'South'; isYellow = true; }
+      else if (normalPhase === 6) { activeDir = 'West';  isYellow = false; }
+      else if (normalPhase === 7) { activeDir = 'West';  isYellow = true; }
+
+      if (dir === activeDir) {
+        return isYellow 
+          ? { color: '#eab308', name: 'YELLOW', isBlue: false }
+          : { color: '#22c55e', name: 'GREEN',  isBlue: false };
+      }
+
+      return { color: '#ef4444', name: 'RED', isBlue: false };
+    }
+
+    // ==================== ANIMATION LOOP & AUDITORY EMISSION ====================
+    function update() {
+      // 1. Auto Patrol
+      if (autoPatrol && !amb.active && !preemption) {
+        autoPatrolTimer++;
+        if (autoPatrolTimer > 400) {
+          autoPatrolTimer = 0;
+          const dirs = ['West', 'South', 'East', 'North'];
+          const randDir = dirs[Math.floor(Math.random() * dirs.length)];
+          dispatchAmbulance(randDir);
+        }
+      }
+
+      // 2. Preemption & Cross-Traffic Warning Sound Pulse
+      if (preemption) {
+        if (activeHoldTicksRemaining > 0) {
+          activeHoldTicksRemaining--;
+        }
+
+        const secsLeft = (activeHoldTicksRemaining / 60).toFixed(1);
+        setElemText('tele-hold-countdown', `${secsLeft} s`);
+
+        // Pulse the Cross-Traffic Warning Buzzer (880Hz / 660Hz rapid beep-beep klaxon)
+        if (audioCtx && warningBuzzerGain && !isSoundMuted) {
+          const pulsePhase = Math.floor(Date.now() / 150) % 2;
+          const buzzerGainVal = pulsePhase === 0 ? 0.08 : 0.0;
+          warningBuzzerGain.gain.setValueAtTime(buzzerGainVal, audioCtx.currentTime);
+          const buzzerFreq = pulsePhase === 0 ? 880 : 660;
+          warningBuzzerOsc.frequency.setValueAtTime(buzzerFreq, audioCtx.currentTime);
+        }
+
+        // Release Preemption Condition
+        if (activeHoldTicksRemaining <= 0 && (!amb.active || amb.hasCrossedBox)) {
+          preemption = false;
+          approaching = null;
+          normalPhase = savedPhase;
+          phaseTimer = savedTimer;
+
+          // Silence cross-traffic warning buzzer
+          if (audioCtx && warningBuzzerGain) {
+            warningBuzzerGain.gain.setValueAtTime(0, audioCtx.currentTime);
+          }
+
+          if (statusPanel) {
+            statusPanel.innerText = 'Ambulance cleared & warning silence. Normal 1-at-a-time green cycle restored.';
+            statusPanel.className = 'status-panel';
+          }
+          setElemText('tele-blue-dir', 'Cleared (Restoring)', 'telemetry-val');
+          setElemText('tele-warning-sound', 'Silent (Normal)', 'telemetry-val');
+          setElemText('tele-stopped', 'None');
+          setElemText('tele-hold-countdown', '-- s');
+        }
+      }
+
+      // 3. Normal Signal Cycle
+      if (!preemption) {
+        phaseTimer++;
+        const currentLimit = (normalPhase % 2 === 0) ? PHASE_GREEN_TICKS : PHASE_YELLOW_TICKS;
+        if (phaseTimer >= currentLimit) {
+          normalPhase = (normalPhase + 1) % 8;
+          phaseTimer = 0;
+        }
+
+        const phaseNames = [
+          'North Green (East/South/West Red)',
+          'North Yellow (East/South/West Red)',
+          'East Green (North/South/West Red)',
+          'East Yellow (North/South/West Red)',
+          'South Green (North/East/West Red)',
+          'South Yellow (North/East/West Red)',
+          'West Green (North/South/East Red)',
+          'West Yellow (North/South/East Red)'
+        ];
+
+        if (statusPanel) {
+          statusPanel.innerText = `Normal Operation: ${phaseNames[normalPhase]}`;
+          statusPanel.className = 'status-panel';
+        }
+        setElemText('tele-phase', phaseNames[normalPhase]);
+        setElemText('tele-mode', 'Normal Cycle (1 Green, 3 Red)', 'telemetry-val');
+        setElemText('tele-blue-dir', 'Inactive (None)', 'telemetry-val');
+        setElemText('tele-warning-sound', 'Silent (Normal)', 'telemetry-val');
+        setElemText('tele-stopped', 'None');
+
+        ['North', 'South', 'East', 'West'].forEach(d => {
+          acousticSensors[d] = 36 + Math.sin(Date.now() / 800 + (d.charCodeAt(0))) * 5;
+        });
+        updateMicUI();
+      }
+
+      // 4. Civilian Vehicles Compliance
+      civilianCars.forEach(car => {
+        const state = getSignalState(car.dir);
+        const canGo = (state.name === 'GREEN' || state.name === 'YELLOW');
+
+        if (car.dir === 'North') {
+          if (car.y > 140 && car.y < 185 && !canGo) car.stopped = true;
+          else car.stopped = false;
+          if (!car.stopped) {
+            car.y += car.vy;
+            if (car.y > 520) car.y = -20;
+          }
+        } else if (car.dir === 'South') {
+          if (car.y < 360 && car.y > 315 && !canGo) car.stopped = true;
+          else car.stopped = false;
+          if (!car.stopped) {
+            car.y += car.vy;
+            if (car.y < -20) car.y = 520;
+          }
+        } else if (car.dir === 'West') {
+          if (car.x > 140 && car.x < 185 && !canGo) car.stopped = true;
+          else car.stopped = false;
+          if (!car.stopped) {
+            car.x += car.vx;
+            if (car.x > 520) car.x = -20;
+          }
+        } else if (car.dir === 'East') {
+          if (car.x < 360 && car.x > 315 && !canGo) car.stopped = true;
+          else car.stopped = false;
+          if (!car.stopped) {
+            car.x += car.vx;
+            if (car.x < -20) car.x = 520;
+          }
+        }
+      });
+
+      // 5. Ambulance Motion & Sound Doppler
+      if (amb.active) {
+        amb.x += amb.vx;
+        amb.y += amb.vy;
+
+        const dist = Math.hypot(amb.x - 250, amb.y - 250);
+        setElemText('tele-dist', Math.round(dist) + ' px');
+
+        const soundDist = Math.max(20, dist);
+        const sensorDb = Math.min(100, Math.max(45, 105 - (soundDist / 380) * 45));
+        acousticSensors[amb.dir] = sensorDb;
+
+        ['North', 'South', 'East', 'West'].forEach(d => {
+          if (d !== amb.dir) {
+            acousticSensors[d] = Math.max(38, sensorDb - 35);
+          }
+        });
+        updateMicUI();
+
+        // Ambulance siren sound
+        if (audioCtx && sirenGain && !isSoundMuted) {
+          const vol = Math.max(0, 1 - dist / 400) * 0.16;
+          sirenGain.gain.setValueAtTime(vol, audioCtx.currentTime);
+          const freq = 720 + Math.sin(Date.now() / 140) * 260;
+          sirenOsc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        } else if (audioCtx && sirenGain && isSoundMuted) {
+          sirenGain.gain.setValueAtTime(0, audioCtx.currentTime);
+        }
+
+        if (amb.dir === 'West' && amb.x > 340) amb.hasCrossedBox = true;
+        if (amb.dir === 'East' && amb.x < 160) amb.hasCrossedBox = true;
+        if (amb.dir === 'South' && amb.y < 160) amb.hasCrossedBox = true;
+        if (amb.dir === 'North' && amb.y > 340) amb.hasCrossedBox = true;
+
+        if (amb.x > 530 || amb.x < -30 || amb.y > 530 || amb.y < -30) {
+          amb.active = false;
+          if (audioCtx && sirenGain) {
+            sirenGain.gain.setValueAtTime(0, audioCtx.currentTime);
+          }
+          setElemText('tele-dist', '-- px');
+        }
+      }
+
+      draw();
+      requestAnimationFrame(update);
+    }
+
+    // ==================== RENDERING / DRAW FUNCTION ====================
+    function draw() {
+      ctx.clearRect(0, 0, 500, 500);
+
+      // Roads
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(200, 0, 100, 500);
+      ctx.fillRect(0, 200, 500, 100);
+
+      // Stop Lines (White)
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(200, 190); ctx.lineTo(300, 190); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(200, 310); ctx.lineTo(300, 310); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(190, 200); ctx.lineTo(190, 300); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(310, 200); ctx.lineTo(310, 300); ctx.stroke();
+
+      // Dashed Road Centerlines
+      ctx.strokeStyle = '#94a3b8';
+      ctx.setLineDash([12, 12]);
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(250, 0); ctx.lineTo(250, 190);
+      ctx.moveTo(250, 310); ctx.lineTo(250, 500);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(0, 250); ctx.lineTo(190, 250);
+      ctx.moveTo(310, 250); ctx.lineTo(500, 250);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Intersection Center Box
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(200, 200, 100, 100);
+
+      // Direction Arrows
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+      ctx.font = 'bold 11px sans-serif';
+      ctx.fillText('▼ SOUTHBOUND', 205, 120);
+      ctx.fillText('▲ NORTHBOUND', 205, 400);
+      ctx.fillText('EASTBOUND ►', 60, 280);
+      ctx.fillText('◄ WESTBOUND', 340, 230);
+
+      // Acoustic Sensor Nodes
+      drawAcousticNode(210, 175, 'N', acousticSensors.North);
+      drawAcousticNode(290, 325, 'S', acousticSensors.South);
+      drawAcousticNode(325, 210, 'E', acousticSensors.East);
+      drawAcousticNode(175, 290, 'W', acousticSensors.West);
+
+      // Civilian Vehicles
+      civilianCars.forEach(car => {
+        ctx.fillStyle = car.stopped ? '#dc2626' : '#3b82f6';
+        ctx.fillRect(car.x - 9, car.y - 9, 18, 18);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '12px sans-serif';
+        ctx.fillText('🚗', car.x - 7, car.y + 5);
+
+        if (car.stopped) {
+          ctx.fillStyle = '#fee2e2';
+          ctx.font = 'bold 8px sans-serif';
+          ctx.fillText('STOP', car.x - 11, car.y - 12);
+        }
+      });
+
+      // 4-Aspect Traffic Signals with Cross-Traffic Audio Badges
+      drawSignalHead(170, 160, 'North');
+      drawSignalHead(330, 340, 'South');
+      drawSignalHead(340, 160, 'East');
+      drawSignalHead(160, 340, 'West');
+
+      // Ambulance & Acoustic Waves
+      if (amb.active) {
+        for (let i = 1; i <= 3; i++) {
+          const waveRadius = (20 * i) + ((Date.now() / 15 + i * 20) % 50);
+          ctx.beginPath();
+          ctx.arc(amb.x, amb.y, waveRadius, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(0, 212, 255, ${Math.max(0, 0.7 - waveRadius / 90)})`;
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+
+        ctx.fillStyle = '#ef4444';
+        ctx.shadowColor = '#00d4ff';
+        ctx.shadowBlur = 24;
+        ctx.fillRect(amb.x - 13, amb.y - 13, 26, 26);
+        ctx.fillStyle = '#fff';
+        ctx.font = '16px sans-serif';
+        ctx.fillText('🚑', amb.x - 10, amb.y + 6);
+        ctx.shadowBlur = 0;
+
+        ctx.fillStyle = '#00d4ff';
+        ctx.font = 'bold 9px sans-serif';
+        ctx.fillText('🔊 SIREN 98dB', amb.x - 24, amb.y - 18);
+      }
+
+      // Preemption Active Banner & Sound Broadcast Callout
+      if (preemption) {
+        const secs = (activeHoldTicksRemaining / 60).toFixed(1);
+        ctx.fillStyle = 'rgba(0, 212, 255, 0.18)';
+        ctx.strokeStyle = '#00d4ff';
+        ctx.lineWidth = 1.5;
+        ctx.fillRect(90, 8, 320, 26);
+        ctx.strokeRect(90, 8, 320, 26);
+
+        ctx.fillStyle = '#00d4ff';
+        ctx.font = 'bold 10px sans-serif';
+        ctx.fillText(`⏱️ BLUE SIGNAL (${approaching}): ${secs}s • 📢 WARNING HORN ACTIVE`, 98, 24);
+      }
+    }
+
+    function drawAcousticNode(x, y, label, dbVal) {
+      const isTriggered = dbVal >= 75;
+      ctx.beginPath();
+      ctx.arc(x, y, 7, 0, Math.PI * 2);
+      ctx.fillStyle = isTriggered ? '#00d4ff' : '#475569';
+      if (isTriggered) {
+        ctx.shadowColor = '#00d4ff';
+        ctx.shadowBlur = 15;
+      }
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      ctx.fillStyle = isTriggered ? '#00d4ff' : '#94a3b8';
+      ctx.font = 'bold 8px sans-serif';
+      ctx.fillText(`🎤 ${label}`, x - 10, y + (y > 250 ? 16 : -10));
+    }
+
+    function drawSignalHead(x, y, dir) {
+      const state = getSignalState(dir);
+
+      ctx.fillStyle = '#0f172a';
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 2;
+      ctx.fillRect(x - 18, y - 18, 36, 36);
+      ctx.strokeRect(x - 18, y - 18, 36, 36);
+
+      ctx.beginPath();
+      ctx.arc(x, y, 12, 0, Math.PI * 2);
+      ctx.fillStyle = state.color;
+
+      if (state.isBlue) {
+        ctx.shadowColor = '#00d4ff';
+        ctx.shadowBlur = 28;
+      } else if (state.color === '#ef4444') {
+        ctx.shadowColor = '#ef4444';
+        ctx.shadowBlur = 10;
+      } else {
+        ctx.shadowColor = state.color;
+        ctx.shadowBlur = 14;
+      }
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ctx.fillStyle = state.isBlue ? '#0f172a' : '#ffffff';
+      ctx.font = 'bold 9px sans-serif';
+      ctx.fillText(dir.charAt(0), x - 3.5, y + 3.5);
+
+      ctx.font = 'bold 8px sans-serif';
+      if (state.isBlue) {
+        ctx.fillStyle = '#00d4ff';
+        ctx.fillText('🔵 BLUE (PRIORITY)', x - 34, y + (y > 250 ? 27 : -22));
+      } else if (preemption && state.color === '#ef4444') {
+        // Active warning buzzer broadcast tag for stopped civilian directions
+        ctx.fillStyle = '#fbbf24';
+        ctx.fillText('📢 ALARM (HALT)', x - 30, y + (y > 250 ? 27 : -22));
+
+        // Draw sound ripple arcs around the red signal to show acoustic warning to others
+        const ripple = (Date.now() / 8) % 18;
+        ctx.beginPath();
+        ctx.arc(x, y, 16 + ripple, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(251, 191, 36, ${Math.max(0, 0.6 - ripple / 25)})`;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      } else if (state.color === '#ef4444') {
+        ctx.fillStyle = '#f87171';
+        ctx.fillText('🔴 RED (STOP)', x - 26, y + (y > 250 ? 27 : -22));
+      } else if (state.color === '#22c55e') {
+        ctx.fillStyle = '#34d399';
+        ctx.fillText('🟢 GREEN (GO)', x - 26, y + (y > 250 ? 27 : -22));
+      } else if (state.color === '#eab308') {
+        ctx.fillStyle = '#facc15';
+        ctx.fillText('🟡 YELLOW', x - 18, y + (y > 250 ? 27 : -22));
+      }
+    }
+
+    window.dispatchAmbulance = dispatchAmbulance;
+    window.resetSimulation = resetSimulation;
+    window.toggleSound = toggleSound;
+    window.toggleAutoPatrol = toggleAutoPatrol;
+    window.setHoldDuration = setHoldDuration;
+    window.setAmbulanceSpeed = setAmbulanceSpeed;
+
+    update();
+  </script>
+</body>
+</html>

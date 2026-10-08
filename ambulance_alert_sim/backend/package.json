@@ -1,0 +1,20 @@
+{
+  "name": "ambulance-alert-sim-backend",
+  "version": "2.3.0",
+  "description": "FastAPI & Mathematical Simulation Engine for Emergency Vehicle Advance-Alert Corridor & V2X Signal Preemption",
+  "main": "src/app.py",
+  "scripts": {
+    "start": "python -m uvicorn src.app:app --host 127.0.0.1 --port 8000 --reload",
+    "dev": "python -m uvicorn src.app:app --host 127.0.0.1 --port 8000 --reload",
+    "test": "python -m pytest tests/",
+    "install:py": "pip install -r requirements.txt"
+  },
+  "keywords": [
+    "traffic-simulation",
+    "fastapi",
+    "v2x",
+    "intelligent-transportation-systems"
+  ],
+  "author": "Aarya Kulkarni",
+  "license": "MIT"
+}

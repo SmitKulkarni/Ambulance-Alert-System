@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Emergency Vehicle Traffic Signal Preemption System - Comprehensive Guide & Unity Codebase</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 16mm 14mm 16mm 14mm;
+      @bottom-right {
+        content: "Page " counter(page) " of " counter(pages);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        font-size: 8pt;
+        color: #64748b;
+      }
+      @bottom-left {
+        content: "Smart Traffic Signal Preemption • Autonomous Corridor Integration";
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        font-size: 8pt;
+        color: #64748b;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 9pt;
+      line-height: 1.45;
+      color: #1e293b;
+      background: #ffffff;
+    }
+
+    .page {
+      page-break-after: always;
+      position: relative;
+    }
+
+    .page:last-child {
+      page-break-after: avoid;
+    }
+
+    .doc-header {
+      border-bottom: 2px solid #0284c7;
+      padding-bottom: 6px;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .doc-title {
+      font-size: 13.5pt;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.3px;
+    }
+
+    .doc-subtitle {
+      font-size: 8pt;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 7.5pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-primary { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+    .badge-success { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .badge-alert { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+
+    h2 {
+      font-size: 10.5pt;
+      font-weight: 700;
+      color: #0f172a;
+      margin-top: 12px;
+      margin-bottom: 6px;
+      border-left: 3.5px solid #0284c7;
+      padding-left: 8px;
+    }
+
+    p {
+      margin-bottom: 6px;
+      text-align: justify;
+    }
+
+    .callout {
+      background: #f8fafc;
+      border-left: 3.5px solid #0284c7;
+      padding: 7px 10px;
+      border-radius: 0 5px 5px 0;
+      margin-bottom: 8px;
+      font-size: 8pt;
+      border-top: 1px solid #f1f5f9;
+      border-right: 1px solid #f1f5f9;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    pre {
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 8px 10px;
+      border-radius: 5px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+      font-size: 7pt;
+      line-height: 1.35;
+      overflow-x: hidden;
+      white-space: pre-wrap;
+      margin-bottom: 8px;
+      border: 1px solid #1e293b;
+    }
+
+    code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+      font-size: 7.5pt;
+      background: #f1f5f9;
+      padding: 1px 3px;
+      border-radius: 3px;
+      color: #0f172a;
+    }
+
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .card {
+      border: 1px solid #e2e8f0;
+      border-radius: 5px;
+      padding: 8px;
+      background: #ffffff;
+    }
+
+    .card-title {
+      font-weight: 700;
+      font-size: 8pt;
+      color: #0369a1;
+      margin-bottom: 4px;
+      border-bottom: 1px dashed #e2e8f0;
+      padding-bottom: 2px;
+    }
+
+    ul, ol {
+      padding-left: 14px;
+      margin-bottom: 6px;
+    }
+
+    li {
+      margin-bottom: 2px;
+      font-size: 8pt;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== PAGE 1: SYSTEM ARCHITECTURE & INTEGRATION ==================== -->
+  <div class="page">
+    <div class="doc-header">
+      <div>
+        <div class="doc-title">Emergency Vehicle Traffic Signal Preemption (EVTSP)</div>
+        <div class="doc-subtitle">Integration Protocol: Mathematical Model, State Restoral & 3D Unity Architecture</div>
+      </div>
+      <div>
+        <span class="badge badge-primary">System Specification</span>
+      </div>
+    </div>
+
+    <h2>1. Operational Principle: Acoustic Siren Detection & 4-Aspect Signal</h2>
+    <p>
+      In our smart traffic network, intersections are equipped with <strong>Directional Acoustic Microphone Sensor Arrays</strong> detecting siren frequency (700&ndash;1500 Hz) and sound intensity. Under normal conditions, traffic cycles in a strict <strong>Single-Green sequence (only 1 approach is Green while the other 3 are Solid Red)</strong>. When an emergency siren exceeds the 75 dB threshold:
+    </p>
+    <ul>
+      <li><strong>4th Aspect Emergency BLUE Priority:</strong> The approach direction from which the ambulance is arriving transitions exclusively to the 4th signal color: <strong>Glowing Emergency BLUE (#00d4ff)</strong>.</li>
+      <li><strong>All Other Signals Stop (Solid Red):</strong> All competing approaches immediately lock to <strong>Solid Red (#ef4444)</strong>, halting cross-traffic behind the white stop lines.</li>
+      <li><strong>Acoustic Directional Sensing:</strong> Real-time directional decibel meters identify the incoming approach corridor automatically without manual operator intervention.</li>
+      <li><strong>Exact State Memory & Resumption:</strong> The controller caches its active phase and remaining timer. Once the vehicle clears the intersection, the blue priority extinguishes and the single-green cycle resumes cleanly.</li>
+    </ul>
+
+    <h2>2. State Transition Machine</h2>
+    <div class="callout">
+      <strong>Normal Cycle:</strong> Strict 1-at-a-time Green (North &rarr; East &rarr; South &rarr; West); competing 3 directions remain Solid Red.<br>
+      <strong>Acoustic Siren Trigger:</strong> Siren sound pressure &ge; 75 dB &rarr; Store snapshot: <code>(activePhase, timeRemaining)</code> &rarr; Lock 3 competing sides to <code>RED</code> &rarr; Set approaching lane to <code>4th-Aspect EMERGENCY_BLUE</code>.<br>
+      <strong>Post-Clearance Exit:</strong> Vehicle departs bounding box &rarr; Extinguish Blue &rarr; Restore snapshot state &rarr; Single-green cycle resumes.
+    </div>
+
+    <h2>3. Mathematical Integration with 1D Corridor Mechanics</h2>
+    <p>
+      At signal-controlled boundary segment $s_k$, effective velocity $v(s_k)$ is constrained by signal factor $\sigma \in \{0, 1\}$:
+      $$v(s_k) = \sigma \cdot v_{\max} \cdot (1 - \rho_{\text{eff}}(s_k))$$
+      Under standard operation, $\sigma = 0$ during red cycles, causing shockwave delay. The EVTSP protocol forces $\sigma = 1$ upon entry into horizon $H$, eliminating queue-clearing stagnation.
+    </p>
+
+    <h2>4. Unity Component Breakdown</h2>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Unity Scene Setup Architecture</div>
+        <ul>
+          <li><strong>Intersection Controller:</strong> Manages overall 4-way intersection logic and caches phase history.</li>
+          <li><strong>Signal Light Objects:</strong> 3D traffic light heads equipped with emissive materials and point lights.</li>
+          <li><strong>Emergency Trigger Zones:</strong> Convex Box/Sphere Colliders marked as <code>IsTrigger = true</code>.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title">Audio & Visual Assets</div>
+        <ul>
+          <li><strong>3D Audio Source:</strong> Configured with Logarithmic Rolloff (min distance 5m, max 100m) attached to ambulance.</li>
+          <li><strong>HDR Emissive Materials:</strong> Materials utilizing <code>_EmissionColor</code> to produce real-time bloom glow in Unity's Universal Render Pipeline (URP).</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== PAGE 2: UNITY C# - INTERSECTION CONTROLLER ==================== -->
+  <div class="page">
+    <div class="doc-header">
+      <div>
+        <div class="doc-title">TrafficSignalController.cs (C# Unity Core)</div>
+        <div class="doc-subtitle">Multi-Way Signal Controller with State Memory & Dynamic Emergency Overrides</div>
+      </div>
+      <div>
+        <span class="badge badge-success">Unity C# Script</span>
+      </div>
+    </div>
+
+    <h2>5. Implementation: <code>TrafficSignalController.cs</code></h2>
+    <pre><code>using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public enum SignalState { Red, Yellow, Green, EmergencyGlowGreen }
+public enum ApproachDirection { North, South, East, West }
+
+[System.Serializable]
+public class SignalHead
+{
+    public ApproachDirection direction;
+    public MeshRenderer redBulb;
+    public MeshRenderer yellowBulb;
+    public MeshRenderer greenBulb;
+    public Light emergencySpotlight; // Optional point/spot light for intense bloom glow
+    [HideInInspector] public SignalState currentState;
+}
+
+public class TrafficSignalController : MonoBehaviour
+{
+    [Header("Signal Heads Configuration")]
+    public List<SignalHead> signals;
+
+    [Header("Cycle Timings (Seconds)")]
+    public float greenDuration = 10.0f;
+    public float yellowDuration = 3.0f;
+
+    [Header("Glow Emission Materials")]
+    public Color redColor = Color.red;
+    public Color yellowColor = Color.yellow;
+    public Color greenColor = Color.green;
+    public Color emergencyGlowColor = new Color(0.1f, 1.0f, 0.4f) * 4.5f; // HDR Multiplier for intense glow
+
+    // State memory for smooth resumption
+    private bool isEmergencyActive = false;
+    private ApproachDirection savedGreenDirection;
+    private float savedTimeInCycle = 0f;
+    private bool savedIsYellow = false;
+    private Coroutine activeCycleCoroutine;
+
+    void Start()
+    {
+        activeCycleCoroutine = StartCoroutine(NormalCycleRoutine());
+    }
+
+    private IEnumerator NormalCycleRoutine()
+    {
+        while (!isEmergencyActive)
+        {
+            // Phase 1: North & South Green
+            savedGreenDirection = ApproachDirection.North;
+            savedIsYellow = false;
+            SetDirectionState(ApproachDirection.North, SignalState.Green);
+            SetDirectionState(ApproachDirection.South, SignalState.Green);
+            SetDirectionState(ApproachDirection.East, SignalState.Red);
+            SetDirectionState(ApproachDirection.West, SignalState.Red);
+
+            for (savedTimeInCycle = 0; savedTimeInCycle < greenDuration; savedTimeInCycle += Time.deltaTime)
+                yield return null;
+
+            // Phase 1 Yellow
+            savedIsYellow = true;
+            SetDirectionState(ApproachDirection.North, SignalState.Yellow);
+            SetDirectionState(ApproachDirection.South, SignalState.Yellow);
+            for (savedTimeInCycle = 0; savedTimeInCycle < yellowDuration; savedTimeInCycle += Time.deltaTime)
+                yield return null;
+
+            // Phase 2: East & West Green
+            savedGreenDirection = ApproachDirection.East;
+            savedIsYellow = false;
+            SetDirectionState(ApproachDirection.North, SignalState.Red);
+            SetDirectionState(ApproachDirection.South, SignalState.Red);
+            SetDirectionState(ApproachDirection.East, SignalState.Green);
+            SetDirectionState(ApproachDirection.West, SignalState.Green);
+
+            for (savedTimeInCycle = 0; savedTimeInCycle < greenDuration; savedTimeInCycle += Time.deltaTime)
+                yield return null;
+
+            // Phase 2 Yellow
+            savedIsYellow = true;
+            SetDirectionState(ApproachDirection.East, SignalState.Yellow);
+            SetDirectionState(ApproachDirection.West, SignalState.Yellow);
+            for (savedTimeInCycle = 0; savedTimeInCycle < yellowDuration; savedTimeInCycle += Time.deltaTime)
+                yield return null;
+        }
+    }
+
+    public void TriggerEmergencyPreemption(ApproachDirection approachingFrom)
+    {
+        if (isEmergencyActive) return;
+        isEmergencyActive = true;
+
+        if (activeCycleCoroutine != null)
+            StopCoroutine(activeCycleCoroutine);
+
+        // Turn all directions RED immediately to clear cross-traffic
+        foreach (var sig in signals)
+        {
+            ApplyState(sig, SignalState.Red);
+        }
+
+        // Grant exclusive priority and intense HDR glow to approaching lane
+        SignalHead target = signals.Find(s => s.direction == approachingFrom);
+        if (target != null)
+        {
+            ApplyState(target, SignalState.EmergencyGlowGreen);
+        }
+    }
+
+    public void ReleaseEmergencyPreemption()
+    {
+        if (!isEmergencyActive) return;
+        isEmergencyActive = false;
+
+        // Reset all to red momentarily to ensure clearing
+        foreach (var sig in signals)
+            ApplyState(sig, SignalState.Red);
+
+        // Resume previous state from exact saved position
+        activeCycleCoroutine = StartCoroutine(ResumeCycleRoutine());
+    }
+
+    private IEnumerator ResumeCycleRoutine()
+    {
+        // Smoothly resume remaining phase duration before continuing standard loop
+        float remaining = (savedIsYellow ? yellowDuration : greenDuration) - savedTimeInCycle;
+        if (remaining > 0.5f)
+        {
+            SignalState resumeState = savedIsYellow ? SignalState.Yellow : SignalState.Green;
+            if (savedGreenDirection == ApproachDirection.North)
+            {
+                SetDirectionState(ApproachDirection.North, resumeState);
+                SetDirectionState(ApproachDirection.South, resumeState);
+            }
+            else
+            {
+                SetDirectionState(ApproachDirection.East, resumeState);
+                SetDirectionState(ApproachDirection.West, resumeState);
+            }
+            yield return new WaitForSeconds(remaining);
+        }
+
+        activeCycleCoroutine = StartCoroutine(NormalCycleRoutine());
+    }
+
+    private void SetDirectionState(ApproachDirection dir, SignalState state)
+    {
+        SignalHead sig = signals.Find(s => s.direction == dir);
+        if (sig != null) ApplyState(sig, state);
+    }
+
+    private void ApplyState(SignalHead head, SignalState state)
+    {
+        head.currentState = state;
+        SetBulb(head.redBulb, state == SignalState.Red, redColor);
+        SetBulb(head.yellowBulb, state == SignalState.Yellow, yellowColor);
+        SetBulb(head.greenBulb, state == SignalState.Green || state == SignalState.EmergencyGlowGreen, 
+                state == SignalState.EmergencyGlowGreen ? emergencyGlowColor : greenColor);
+
+        if (head.emergencySpotlight != null)
+            head.emergencySpotlight.enabled = (state == SignalState.EmergencyGlowGreen);
+    }
+
+    private void SetBulb(MeshRenderer renderer, bool isOn, Color color)
+    {
+        if (renderer == null) return;
+        Material mat = renderer.material;
+        if (isOn)
+        {
+            mat.EnableKeyword("_EMISSION");
+            mat.SetColor("_EmissionColor", color);
+        }
+        else
+        {
+            mat.DisableKeyword("_EMISSION");
+            mat.SetColor("_EmissionColor", Color.black);
+        }
+    }
+}
+</code></pre>
+  </div>
+
+  <!-- ==================== PAGE 3: UNITY C# - EMERGENCY VEHICLE & AUDIO ==================== -->
+  <div class="page">
+    <div class="doc-header">
+      <div>
+        <div class="doc-title">AmbulanceVehicle.cs & IntersectionTrigger.cs</div>
+        <div class="doc-subtitle">Siren Audio Synthesis, Rigidbody Movement & Collision Triggers</div>
+      </div>
+      <div>
+        <span class="badge badge-primary">Unity Scripts</span>
+      </div>
+    </div>
+
+    <h2>6. Implementation: <code>AmbulanceVehicle.cs</code></h2>
+    <pre><code>using UnityEngine;
+
+[RequireComponent(typeof(AudioSource))]
+public class AmbulanceVehicle : MonoBehaviour
+{
+    [Header("Kinematics")]
+    public float targetSpeed = 15.0f; // m/s
+    public bool isRespondingToEmergency = true;
+
+    [Header("Audio Siren Configuration")]
+    public AudioClip sirenClip;
+    [Range(0f, 1f)] public float sirenVolume = 1.0f;
+    public float minAudioDistance = 5.0f;
+    public float maxAudioDistance = 120.0f;
+
+    private AudioSource audioSource;
+    private Rigidbody rb;
+
+    void Awake()
+    {
+        rb = GetComponent<Rigidbody>();
+        audioSource = GetComponent<AudioSource>();
+
+        // Configure 3D Spatial Audio and Doppler Effect
+        audioSource.clip = sirenClip;
+        audioSource.loop = true;
+        audioSource.volume = sirenVolume;
+        audioSource.spatialBlend = 1.0f; // Fully 3D sound
+        audioSource.dopplerLevel = 1.5f;
+        audioSource.rolloffMode = AudioRolloffMode.Logarithmic;
+        audioSource.minDistance = minAudioDistance;
+        audioSource.maxDistance = maxAudioDistance;
+    }
+
+    void Start()
+    {
+        if (isRespondingToEmergency && sirenClip != null)
+        {
+            audioSource.Play();
+        }
+    }
+
+    void FixedUpdate()
+    {
+        if (isRespondingToEmergency)
+        {
+            // Continuous forward displacement along local heading
+            Vector3 targetVelocity = transform.forward * targetSpeed;
+            if (rb != null)
+                rb.linearVelocity = new Vector3(targetVelocity.x, rb.linearVelocity.y, targetVelocity.z);
+            else
+                transform.position += targetVelocity * Time.fixedDeltaTime;
+        }
+    }
+}
+</code></pre>
+
+    <h2>7. Implementation: <code>IntersectionTrigger.cs</code></h2>
+    <pre><code>using UnityEngine;
+
+public class IntersectionTrigger : MonoBehaviour
+{
+    public TrafficSignalController controller;
+    public ApproachDirection entryDirection;
+
+    private void OnTriggerEnter(Collider other)
+    {
+        AmbulanceVehicle ambulance = other.GetComponentInParent<AmbulanceVehicle>();
+        if (ambulance != null && ambulance.isRespondingToEmergency)
+        {
+            // Request exclusive priority for this approach
+            controller.TriggerEmergencyPreemption(entryDirection);
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        AmbulanceVehicle ambulance = other.GetComponentInParent<AmbulanceVehicle>();
+        if (ambulance != null && ambulance.isRespondingToEmergency)
+        {
+            // Release priority: ambulance has cleared the intersection, restore previous cycle
+            controller.ReleaseEmergencyPreemption();
+        }
+    }
+}
+</code></pre>
+  </div>
+
+  <!-- ==================== PAGE 4: INTERACTIVE VIRTUAL WEB SIMULATION WITH AUDIO ==================== -->
+  <div class="page">
+    <div class="doc-header">
+      <div>
+        <div class="doc-title">Interactive Virtual 4-Way Simulation (HTML5/Web Audio)</div>
+        <div class="doc-subtitle">Real-Time Canvas Simulation with Synthesized Doppler Siren & Signal Preemption</div>
+      </div>
+      <div>
+        <span class="badge badge-alert">Browser Simulation</span>
+      </div>
+    </div>
+
+    <h2>8. Complete Simulation Source: <code>intersection_simulation.html</code></h2>
+    <p>
+      This standalone code file replicates the complete Unity preemption mechanics, complete with a <strong>synthesized Web Audio emergency siren</strong>, dynamic 4-way intersection signals, glowing priority indicators, and automatic state resumption.
+    </p>
+
+    <div class="callout">
+      The standalone interactive simulator is implemented in <a href="intersection_simulation.html" target="_blank" style="color:#0284c7; font-weight:bold;">intersection_simulation.html</a>, allowing direct execution in modern web browsers without external dependencies.
+    </div>
+
+    <pre><code>&lt;!-- Key JavaScript Event Dispatch Logic --&gt;
+function dispatchAmbulance(direction) {
+  initAudio();
+  approaching = direction;
+  amb.active = true;
+  amb.dir = direction;
+  if (direction === 'West') { amb.x = 20; amb.y = 265; amb.vx = 2.6; amb.vy = 0; }
+  if (direction === 'South') { amb.x = 235; amb.y = 480; amb.vx = 0; amb.vy = -2.6; }
+}
+
+function updatePreemptionState(dist) {
+  if (dist &lt; 180 &amp;&amp; !preemption &amp;&amp; dist &gt; 20) {
+    preemption = true;
+    savedPhase = phase;
+    savedTimer = phaseTimer;
+    // Approaching signal set to EMERGENCY_GLOW_GREEN; All others set to SOLID_RED
+  }
+}
+</code></pre>
+  </div>
+
+  <!-- ==================== PAGE 5: UNITY SETUP RUNBOOK & VIVA DEFENSE ==================== -->
+  <div class="page">
+    <div class="doc-header">
+      <div>
+        <div class="doc-title">Unity Setup Runbook & Technical Defense Guide</div>
+        <div class="doc-subtitle">Scene Configuration, Universal Render Pipeline (URP) Bloom & Viva Talking Points</div>
+      </div>
+      <div>
+        <span class="badge badge-primary">Unity Integration Guide</span>
+      </div>
+    </div>
+
+    <h2>9. Step-by-Step Unity Setup Runbook</h2>
+    <ol>
+      <li>
+        <strong>Scene & Corridor Hierarchy Setup:</strong> Create 4 intersecting road planes. Add an empty GameObject named <code>Intersection_Controller</code> and attach <code>TrafficSignalController.cs</code>.
+      </li>
+      <li>
+        <strong>Traffic Light Heads & Mesh Setup:</strong> Create 4 signal post prefabs. Each post must have 3 child spheres representing Red, Yellow, and Green bulbs. Assign each sphere an individual Material supporting Emission (URP/Lit or Standard).
+      </li>
+      <li>
+        <strong>Bloom Glow Effect Configuration:</strong> In Unity URP, add a Global Volume &rarr; Add Override &rarr; <strong>Bloom</strong>. Set Intensity = <code>1.5</code>, Threshold = <code>0.9</code>. When the script sets <code>_EmissionColor</code> with an HDR multiplier, the bulb will produce a realistic glowing halo on camera.
+      </li>
+      <li>
+        <strong>Emergency Trigger Colliders:</strong> Place an empty GameObject on each incoming approach ~50–80m before the intersection. Add a Box Collider with <strong>IsTrigger = true</strong>. Attach <code>IntersectionTrigger.cs</code> and assign the appropriate approach direction.
+      </li>
+      <li>
+        <strong>Ambulance Prefab Configuration:</strong> Attach <code>AmbulanceVehicle.cs</code>, a Rigidbody, an AudioSource, and an emergency vehicle siren WAV/MP3 file. Set <strong>Spatial Blend = 1.0 (3D)</strong> to enable realistic Doppler attenuation.
+      </li>
+    </ol>
+
+    <h2>10. Viva Defense & Technical Q&A</h2>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Q: How does the system prevent cross-traffic accidents?</div>
+        <p style="font-size:7.5pt;">
+          <strong>Answer:</strong> The instant the emergency detection trigger fires, all competing signal phases are interrupted and immediately forced to Solid Red. An optional 1.5-second all-red clearance interval can be added to ensure any vehicle currently inside the intersection clears before the emergency green activates.
+        </p>
+      </div>
+      <div class="card">
+        <div class="card-title">Q: How does cycle memory prevent post-clearance starvation?</div>
+        <p style="font-size:7.5pt;">
+          <strong>Answer:</strong> Rather than resetting the whole cycle to phase 0, the controller caches the active phase enum and the elapsed cycle time. Once the ambulance clears the departure trigger, the system resumes the exact phase and remaining green time that were paused, preventing phase starvation for other lanes.
+        </p>
+      </div>
+    </div>
+
+    <h2>11. Final Integration Checklist</h2>
+    <ul style="font-size:8pt;">
+      <li>[x] <code>TrafficSignalController.cs</code> integrated with HDR emission control and state memory.</li>
+      <li>[x] <code>AmbulanceVehicle.cs</code> configured with 3D audio siren and forward kinematics.</li>
+      <li>[x] <code>IntersectionTrigger.cs</code> detecting arrival and departure boundaries.</li>
+      <li>[x] Interactive browser simulator (<code>intersection_simulation.html</code>) with synthesized Web Audio siren and visual bloom.</li>
+    </ul>
+  </div>
+
+</body>
+</html>

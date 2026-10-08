@@ -1,0 +1,24 @@
+{
+  "name": "ambulance-alert-corridor-simulator",
+  "version": "2.3.0",
+  "description": "Decoupled Intelligent Transportation System: Advance Ambulance Alert Corridor & V2X Signal Preemption",
+  "scripts": {
+    "start": "concurrently --kill-others \"npm run start:backend\" \"npm run start:frontend\"",
+    "start:backend": "npm --prefix backend run start",
+    "start:frontend": "npm --prefix frontend run dev",
+    "test": "npm --prefix backend run test",
+    "build:frontend": "npm --prefix frontend run build"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "keywords": [
+    "traffic-simulation",
+    "v2x",
+    "fastapi",
+    "vite",
+    "emergency-preemption"
+  ],
+  "author": "Aarya Kulkarni",
+  "license": "MIT"
+}

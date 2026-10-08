@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ambulance Advance-Alert Corridor Simulator (Phase 8)</title>
+  <link rel="stylesheet" href="/src/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        for (const reg of regs) {
+          reg.unregister();
+        }
+      });
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge-phase">Phase 8: Connected V2X & Green Corridor Preemption Active</div>
+      <h1>Ambulance Advance-Alert Corridor Simulator</h1>
+      <p>Decoupled Computational Engine: Macroscopic Flow, Microscopic IDM, & V2X Traffic Signal Preemption</p>
+      
+      <!-- View Navigation Tabs -->
+      <div class="tabs-nav">
+        <button class="tab-btn active" id="tab-btn-macro" onclick="switchTab('macro')">
+          <span class="tab-icon">📊</span> Macroscopic Density Model (Phase 5)
+        </button>
+        <button class="tab-btn" id="tab-btn-micro" onclick="switchTab('micro')">
+          <span class="tab-icon">🚗</span> Microscopic Multi-Lane & GIS (Phase 7)
+        </button>
+        <button class="tab-btn" id="tab-btn-v2x" onclick="switchTab('v2x')">
+          <span class="tab-icon">📡</span> V2X & Green Corridor (Phase 8)
+        </button>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 6px;">
+        <a href="/intersection_simulation.html" target="_blank" style="text-decoration: none;">
+          <button style="background: rgba(220, 38, 38, 0.2); border: 1px solid #ef4444; color: #fca5a5; font-size: 0.8rem; padding: 6px 14px; border-radius: 6px; cursor: pointer;">
+            🚨 4-Way Intersection Preemption (EVTSP Canvas)
+          </button>
+        </a>
+        <a href="/traffic_signal_preemption_guide.html" target="_blank" style="text-decoration: none;">
+          <button style="background: rgba(2, 132, 199, 0.2); border: 1px solid #38bdf8; color: #7dd3fc; font-size: 0.8rem; padding: 6px 14px; border-radius: 6px; cursor: pointer;">
+            📄 EVTSP Unity Codebase & Defense Guide
+          </button>
+        </a>
+      </div>
+    </header>
+
+    <!-- Global Simulation Controls -->
+    <div class="card params-grid">
+      <div class="input-group">
+        <label for="horizon">Alert Horizon H (Segments)</label>
+        <input type="number" id="horizon" value="3" min="0" max="10">
+      </div>
+      <div class="input-group">
+        <label for="cooperation">Cooperation Factor α (0.0 - 1.0)</label>
+        <input type="number" id="cooperation" value="0.5" step="0.1" min="0.0" max="1.0">
+      </div>
+      <div class="input-group">
+        <label for="corridor">Corridor Segments (N)</label>
+        <input type="number" id="corridor" value="20" min="10" max="50">
+      </div>
+      <div class="input-group" id="group-v2x-proto">
+        <label for="v2x-protocol">V2X Protocol</label>
+        <select id="v2x-protocol">
+          <option value="cv2x_5g">5G C-V2X (Release 16+ NR-V2X)</option>
+          <option value="dsrc">DSRC / IEEE 802.11p (5.9 GHz)</option>
+        </select>
+      </div>
+      <div class="btn-group">
+        <button class="btn-primary" id="btn-run" onclick="startActiveSimulation()">Run Simulation</button>
+        <button class="btn-secondary" id="btn-pause" onclick="togglePause()">Pause</button>
+      </div>
+    </div>
+
+    <!-- ==================== MACROSCOPIC VIEW (PHASE 5) ==================== -->
+    <div id="view-macro" class="tab-content active">
+      <div class="card stats-grid">
+        <div class="stat-box">
+          <div class="stat-label">Simulation Step</div>
+          <div class="stat-val" id="metric-step">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Baseline Transit</div>
+          <div class="stat-val red" id="metric-baseline-time">-- steps</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Alert Model Transit</div>
+          <div class="stat-val blue" id="metric-alert-time">-- steps</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Transit Efficiency Gain</div>
+          <div class="stat-val green" id="metric-saved">--</div>
+        </div>
+      </div>
+
+      <div class="card corridor-section">
+        <div class="lane-wrapper">
+          <div class="lane-header">
+            <span style="color: #38bdf8;">Connected Alert Lane (H Ahead Cleared)</span>
+            <span id="lane-alert-status">Standing By</span>
+          </div>
+          <div class="road-track" id="track-alert">
+            <div class="ambulance-marker alert-active" id="amb-alert">🚑</div>
+          </div>
+        </div>
+
+        <div class="lane-wrapper">
+          <div class="lane-header">
+            <span style="color: #ef4444;">Baseline Corridor (No Early Alerting)</span>
+            <span id="lane-base-status">Standing By</span>
+          </div>
+          <div class="road-track" id="track-base">
+            <div class="ambulance-marker" id="amb-base">🚑</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <canvas id="trajectoryChart" style="max-height: 250px;"></canvas>
+      </div>
+    </div>
+
+    <!-- ==================== MICROSCOPIC & GIS VIEW (PHASE 7) ==================== -->
+    <div id="view-micro" class="tab-content">
+      <div class="card stats-grid">
+        <div class="stat-box">
+          <div class="stat-label">Elapsed Time</div>
+          <div class="stat-val" id="micro-metric-time">0.0 s</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Baseline Travel Time</div>
+          <div class="stat-val red" id="micro-metric-base">-- s</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Alert Travel Time</div>
+          <div class="stat-val blue" id="micro-metric-alert">-- s</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Microscopic Time Saved</div>
+          <div class="stat-val green" id="micro-metric-gain">--</div>
+        </div>
+      </div>
+
+      <div class="card gis-card">
+        <div class="gis-header">
+          <span class="gis-title">📍 Metro Arterial GIS Transit Route</span>
+          <span class="gis-status" id="gis-active-landmark">Tracking Corridor...</span>
+        </div>
+        <div class="gis-waypoints-ribbon" id="gis-waypoints-list"></div>
+      </div>
+
+      <div class="card micro-road-card">
+        <div class="lane-header">
+          <span style="color: #38bdf8;">Multi-Lane Connected Corridor (IDM Car-Following & Emergency Yielding)</span>
+          <span id="micro-corridor-status">Ambulance cruising</span>
+        </div>
+        <div class="road-legend">
+          <span class="legend-item"><span class="legend-dot amb"></span> Ambulance 🚑</span>
+          <span class="legend-item"><span class="legend-dot fast"></span> Civilian (Emergency Lane)</span>
+          <span class="legend-item"><span class="legend-dot slow"></span> Civilian (Slow Lane)</span>
+          <span class="legend-item"><span class="legend-dot yield"></span> Yielding (Changing Lane)</span>
+          <span class="legend-item"><span class="legend-dot horizon"></span> Alert Horizon Zone</span>
+        </div>
+
+        <div class="micro-canvas-container" id="micro-canvas-container">
+          <div class="micro-lane-track" id="micro-lane-1">
+            <div class="lane-name-tag">Lane 1 (Emergency Priority)</div>
+          </div>
+          <div class="lane-divider-line"></div>
+          <div class="micro-lane-track" id="micro-lane-0">
+            <div class="lane-name-tag">Lane 0 (Civilian Slow Lane)</div>
+          </div>
+          <div class="alert-horizon-overlay" id="micro-horizon-zone"></div>
+        </div>
+      </div>
+
+      <div class="card micro-telemetry-grid">
+        <div class="telemetry-box">
+          <div class="telemetry-title">Ambulance Speed</div>
+          <div class="telemetry-value" id="micro-amb-speed">0.00 seg/s</div>
+          <div class="telemetry-sub" id="micro-amb-pos">Position: Seg 0.00</div>
+        </div>
+        <div class="telemetry-box">
+          <div class="telemetry-title">Active Civilian Yielding</div>
+          <div class="telemetry-value" id="micro-yield-count">0 vehicles</div>
+          <div class="telemetry-sub">Clearing Lane 1 ahead</div>
+        </div>
+        <div class="telemetry-box">
+          <div class="telemetry-title">IDM Car-Following State</div>
+          <div class="telemetry-value" id="micro-flow-state">Dynamic Stable</div>
+          <div class="telemetry-sub">Longitudinal acceleration clamped</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== V2X & GREEN CORRIDOR VIEW (PHASE 8) ==================== -->
+    <div id="view-v2x" class="tab-content">
+      <div class="card stats-grid">
+        <div class="stat-box">
+          <div class="stat-label">Elapsed Time</div>
+          <div class="stat-val" id="v2x-metric-time">0.0 s</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Conventional Baseline</div>
+          <div class="stat-val red" id="v2x-metric-base">-- s</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Connected Green Corridor</div>
+          <div class="stat-val blue" id="v2x-metric-alert">-- s</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Total Time Saved</div>
+          <div class="stat-val green" id="v2x-metric-gain">--</div>
+        </div>
+      </div>
+
+      <!-- Traffic Signal Gantries Corridor Track -->
+      <div class="card v2x-road-card">
+        <div class="lane-header">
+          <span style="color: #38bdf8;">Green Corridor Arterial Track with Automated Signal Preemption (V2I)</span>
+          <span id="v2x-corridor-status">V2I Radios Synchronized</span>
+        </div>
+        
+        <div class="v2x-track-container" id="v2x-track-container">
+          <div class="road-track" id="v2x-road-track">
+            <div class="ambulance-marker alert-active" id="v2x-amb-marker">
+              🚑
+              <div class="v2x-ripple"></div>
+            </div>
+          </div>
+          <!-- Signal Gantries rendered dynamically above respective segments -->
+          <div class="v2x-gantries-overlay" id="v2x-gantries-overlay"></div>
+        </div>
+      </div>
+
+      <!-- V2X Communication Monitor & Preemption Audit -->
+      <div class="card v2x-telemetry-grid">
+        <div class="telemetry-box">
+          <div class="telemetry-title">V2X Packet Delivery Ratio</div>
+          <div class="telemetry-value" id="v2x-pdr">-- %</div>
+          <div class="telemetry-sub" id="v2x-packets-count">0 sent / 0 received</div>
+        </div>
+        <div class="telemetry-box">
+          <div class="telemetry-title">Channel Latency</div>
+          <div class="telemetry-value" id="v2x-latency">-- ms</div>
+          <div class="telemetry-sub" id="v2x-proto-active">Protocol: 5G C-V2X</div>
+        </div>
+        <div class="telemetry-box">
+          <div class="telemetry-title">Signal Wait Delay Avoided</div>
+          <div class="telemetry-value green" id="v2x-delay-avoided">0.0 s</div>
+          <div class="telemetry-sub" id="v2x-preempt-count">0 Preemptions Triggered</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module" src="/src/app.js"></script>
+</body>
+</html>

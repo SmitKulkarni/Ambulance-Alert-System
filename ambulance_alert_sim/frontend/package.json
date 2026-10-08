@@ -1,0 +1,21 @@
+{
+  "name": "ambulance-alert-sim-frontend",
+  "version": "2.3.0",
+  "description": "Interactive Web Dashboard & 3D Intersection Visualizer for Ambulance Alert & Signal Preemption",
+  "scripts": {
+    "dev": "vite",
+    "start": "vite --port 3000 --open",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^6.2.0"
+  },
+  "keywords": [
+    "vite",
+    "dashboard",
+    "traffic-simulation"
+  ],
+  "author": "Aarya Kulkarni",
+  "license": "MIT"
+}

@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Advance Ambulance-Alert Corridor Simulator - Comprehensive Implementation Guide</title>
+<style>
+@page {
+  size: A4;
+  margin: 18mm 16mm 18mm 16mm;
+  @bottom-right {
+    content: "Page " counter(page) " of " counter(pages);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 8pt;
+    color: #64748b;
+  }
+  @bottom-left {
+    content: "Advance Ambulance-Alert Corridor Simulator • Engineering Project Runbook";
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 8pt;
+    color: #64748b;
+  }
+}
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 9.5pt;
+  line-height: 1.45;
+  color: #1e293b;
+  background: #ffffff;
+  padding: 20px;
+}
+.page {
+  page-break-after: always;
+  position: relative;
+  margin-bottom: 30px;
+}
+.page:last-child {
+  page-break-after: avoid;
+}
+/* Header styling */
+.doc-header {
+  border-bottom: 2px solid #0284c7;
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+.doc-title {
+  font-size: 14pt;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.3px;
+}
+.doc-subtitle {
+  font-size: 8.5pt;
+  color: #64748b;
+  margin-top: 2px;
+}
+.badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 7.5pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.badge-primary {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+.badge-success {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+.badge-danger {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+/* Section Headings */
+h2 {
+  font-size: 11pt;
+  font-weight: 700;
+  color: #0f172a;
+  margin-top: 14px;
+  margin-bottom: 8px;
+  border-left: 3.5px solid #0284c7;
+  padding-left: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+h3 {
+  font-size: 9.5pt;
+  font-weight: 700;
+  color: #334155;
+  margin-top: 10px;
+  margin-bottom: 4px;
+}
+p {
+  margin-bottom: 8px;
+  text-align: justify;
+}
+/* Callout & Cards */
+.callout {
+  background: #f8fafc;
+  border-left: 3.5px solid #64748b;
+  padding: 8px 12px;
+  border-radius: 0 6px 6px 0;
+  margin-bottom: 10px;
+  font-size: 8.5pt;
+  border-top: 1px solid #f1f5f9;
+  border-right: 1px solid #f1f5f9;
+  border-bottom: 1px solid #f1f5f9;
+}
+.callout-alert {
+  background: #fff1f2;
+  border-left-color: #e11d48;
+  border-color: #ffe4e6;
+}
+.callout-success {
+  background: #f0fdf4;
+  border-left-color: #16a34a;
+  border-color: #dcfce7;
+}
+/* Code Snippets */
+pre {
+  background: #0f172a;
+  color: #f8fafc;
+  padding: 9px 12px;
+  border-radius: 6px;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  font-size: 7.5pt;
+  line-height: 1.35;
+  overflow-x: hidden;
+  white-space: pre-wrap;
+  margin-bottom: 10px;
+  border: 1px solid #1e293b;
+}
+code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  font-size: 8pt;
+  background: #f1f5f9;
+  padding: 1px 4px;
+  border-radius: 3px;
+  color: #0f172a;
+}
+pre code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+}
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 12px;
+  font-size: 8pt;
+}
+th, td {
+  border: 1px solid #cbd5e1;
+  padding: 5px 8px;
+  text-align: left;
+}
+th {
+  background: #f1f5f9;
+  font-weight: 700;
+  color: #1e293b;
+}
+tr:nth-child(even) td {
+  background: #f8fafc;
+}
+/* Grid Layouts */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.card {
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 10px;
+  background: #ffffff;
+}
+.card-title {
+  font-weight: 700;
+  font-size: 8.5pt;
+  color: #0369a1;
+  margin-bottom: 4px;
+  border-bottom: 1px dashed #e2e8f0;
+  padding-bottom: 3px;
+}
+ul, ol {
+  padding-left: 16px;
+  margin-bottom: 8px;
+}
+li {
+  margin-bottom: 3px;
+}
+</style>
+</head>
+<body>
+
+<!-- ==================== PAGE 1: PROJECT OVERVIEW & ARCHITECTURE ==================== -->
+<div class="page">
+  <div class="doc-header">
+    <div>
+      <div class="doc-title">Advance Ambulance-Alert Corridor Simulator</div>
+      <div class="doc-subtitle">Project Manual, Implementation Reference & Architectural Model</div>
+    </div>
+    <div>
+      <span class="badge badge-primary">Comprehensive Guide</span>
+    </div>
+  </div>
+
+  <h2>1. Executive Summary & Mathematical Model</h2>
+  <p>
+    In dense urban traffic corridors, emergency response vehicles experience severe transit delays due to late civilian driver awareness. Siren cues afford minimal reaction distance (&lt;100m). This project models and simulates a 1D corridor of $N = 20$ discrete segments where advance alerts warn downstream drivers, dynamically reducing effective traffic congestion and restoring ambulance speed.
+  </p>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Mathematical Formulation</div>
+      <p style="font-size:8pt; margin-bottom:4px;">
+        • <strong>Corridor Discretization:</strong> Divided into $N = 20$ segments.<br>
+        • <strong>Base Traffic Density:</strong> Linear ramp $\rho_{\text{base}} \in [0.2, 0.8]$.<br>
+        • <strong>Speed-Density Governing Law:</strong><br>
+        $$v(\rho) = v_{\max} \cdot (1 - \rho)$$
+        where $v_{\max} = 1.0$ segment per time step and $\rho \in [0, 1]$.
+      </p>
+    </div>
+    <div class="card">
+      <div class="card-title">Advance-Alert Mechanism</div>
+      <p style="font-size:8pt; margin-bottom:4px;">
+        • <strong>Alert Horizon ($H$):</strong> Lookahead segment reach ($H=3$).<br>
+        • <strong>Driver Cooperation Factor ($\alpha \in [0, 1]$):</strong> Yield compliance ($\alpha=0.5$).<br>
+        • <strong>Effective Density Formulation:</strong><br>
+        $$\rho_{\text{eff}}(i) = \rho_{\text{base}}(i) \cdot (1 - \alpha)$$
+        $\forall \; i \in [pos + 1, \; \min(pos + H + 1, N)]$.
+      </p>
+    </div>
+  </div>
+
+  <h2>2. Flaws in Initial Blueprint vs. Corrected Implementation</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 24%;">Fault Identified</th>
+        <th style="width: 38%;">Preliminary Buggy Behavior</th>
+        <th style="width: 38%;">Corrected Architecture Logic</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Kinematic Lookahead Decoupling</strong></td>
+        <td>Lookahead segment clearing modified indices ahead, but speed evaluated <code>rho_eff[idx]</code> (current segment), giving zero time savings.</td>
+        <td>Ambulance step displacement computes speed based on the upcoming segment <code>rho_eff[next_idx]</code>, physically capturing early alert benefits.</td>
+      </tr>
+      <tr>
+        <td><strong>Truncated Syntax & Scope Errors</strong></td>
+        <td>Core statements in <code>main.py</code> and <code>experiments.py</code> were truncated in preliminary guides.</td>
+        <td>Complete syntactic rebuild across all components with automated unit test coverage.</td>
+      </tr>
+      <tr>
+        <td><strong>Boundary & Array Edge Clipping</strong></td>
+        <td>Float-to-integer cast anomalies caused segment boundary index errors on float horizons.</td>
+        <td>Safe integer casting and boundary guards <code>min(idx + 1, N - 1)</code> prevent array out-of-bounds.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>3. Three-Member Project Division Matrix</h2>
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-title">Member A: Core Engine</div>
+      <ul style="font-size:7.5pt;">
+        <li>Construct <code>config.py</code> parameters</li>
+        <li>Build numerical models in <code>simulator.py</code></li>
+        <li>Implement speed calculation and forward transitions</li>
+        <li>Validate unit operations with Member B</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">Member B: Experiments & Data</div>
+      <ul style="font-size:7.5pt;">
+        <li>Develop <code>experiments.py</code> automation</li>
+        <li>Perform parameter sweeps across $H \in [0, 5]$</li>
+        <li>Evaluate compliance range $\alpha \in [0.0, 1.0]$</li>
+        <li>Export visual graphs and tabular CSV outputs</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">Member C: Interactive & Viva</div>
+      <ul style="font-size:7.5pt;">
+        <li>Implement <code>main.py</code> & demo visualizers</li>
+        <li>Maintain <code>demo_notebook.ipynb</code> pipeline</li>
+        <li>Formulate technical validation report</li>
+        <li>Prepare viva responses & defense briefing</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout callout-success">
+    <strong>Directory Architecture Standard:</strong> All source scripts and outputs maintain clean encapsulation inside <code>ambulance_alert_sim/</code>.
+  </div>
+</div>
+
+<!-- ==================== PAGE 2: EXECUTION & TEST SUITE ==================== -->
+<div class="page">
+  <div class="doc-header">
+    <div>
+      <div class="doc-title">Advance Ambulance-Alert Corridor Simulator</div>
+      <div class="doc-subtitle">Validation Framework: test_simulator.py & Verification Output</div>
+    </div>
+    <div>
+      <span class="badge badge-primary">Testing & Analytics</span>
+    </div>
+  </div>
+
+  <h2>4. Automated Unit Testing Suite: <code>test_simulator.py</code></h2>
+  <p>
+    An automated invariant suite executed via Pytest ensures mathematical correctness and eliminates regressions:
+  </p>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Key Invariants Tested</div>
+      <ul style="font-size:8pt;">
+        <li><code>test_density()</code>: Corridor length equals $N$ and densities are within $[0, 1]$.</li>
+        <li><code>test_alert_reduces_future_density()</code>: Proves clearing occurs strictly in horizon window.</li>
+        <li><code>test_speed()</code>: Tests boundary speeds at densities $0.0$, $1.0$, and clipping.</li>
+        <li><code>test_simulation_finishes()</code>: Guarantees simulation reaches termination boundary $T_{max}$.</li>
+        <li><code>test_alert_is_not_worse_in_this_model()</code>: Invariant: $t_{\text{alert}} \le t_{\text{baseline}}$.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">Edge Case Defenses</div>
+      <ul style="font-size:8pt;">
+        <li><code>test_parameter_validation_errors()</code>: Rejects $H < 0$, $\alpha < 0$, $\alpha > 1$.</li>
+        <li><code>test_float_horizon_safe()</code>: Handles float inputs ($H=3.0$) safely.</li>
+        <li><code>test_zero_horizon_equals_no_alert()</code>: Confirms $H=0$ matches baseline.</li>
+        <li><code>test_zero_alpha_equals_no_alert()</code>: Confirms $\alpha=0.0$ matches baseline.</li>
+        <li><code>test_short_density_array_raises()</code>: Validates array length boundary protection.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>5. Step-by-Step Terminal Execution Sequence</h2>
+  <div class="callout">
+    <strong>Step 1: Environment Initialization</strong><br>
+    <code>python -m venv .venv</code><br>
+    <code>.venv\Scripts\activate</code> <em>(Windows)</em> or <code>source .venv/bin/activate</code> <em>(macOS/Linux)</em><br>
+    <code>pip install -r requirements.txt</code>
+  </div>
+  <div class="callout">
+    <strong>Step 2: Automated Invariant Testing</strong><br>
+    <code>pytest -v test_simulator.py</code><br>
+    <em>Expected:</em> <code>11 passed in 0.24s</code>
+  </div>
+  <div class="callout">
+    <strong>Step 3: Baseline Comparative Run</strong><br>
+    <code>python main.py</code><br>
+    <em>Output:</em> Baseline: 45 steps | Alert: 26 steps | Saved: 19 steps (<strong>42.22% improvement</strong>)
+  </div>
+  <div class="callout">
+    <strong>Step 4: Parametric Sweeps</strong><br>
+    <code>python experiments.py</code><br>
+    <em>Outputs:</em> <code>results/results_H.csv</code>, <code>results/results_alpha.csv</code>, <code>results/summary.txt</code>, and sensitivity plots.
+  </div>
+</div>
+
+<!-- ==================== PAGE 3: VIVA VOCE & SUBMISSION CHECKLIST ==================== -->
+<div class="page">
+  <div class="doc-header">
+    <div>
+      <div class="doc-title">Advance Ambulance-Alert Corridor Simulator</div>
+      <div class="doc-subtitle">Viva Voce Defense Dossier & Submission Deliverables</div>
+    </div>
+    <div>
+      <span class="badge badge-success">Defense Ready</span>
+    </div>
+  </div>
+
+  <h2>6. Viva Voce Defense Dossier (Key Talking Points)</h2>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Core Concept & Results</div>
+      <p style="font-size:8pt;">
+        • <strong>Core Concept:</strong> Audible sirens offer late reaction cues (&lt;100m). Advance digital alerts communicate upstream electronically, enabling drivers to yield before the ambulance arrives.<br>
+        • <strong>Experimental Finding:</strong> Early warning saves <strong>19 time steps (42.22% reduction)</strong> under typical baseline parameters ($H=3, \alpha=0.5$).<br>
+        • <strong>Horizon Behavior:</strong> Once advance warning is provided ($H \ge 1$), upcoming bottleneck segments are cleared proactively.
+      </p>
+    </div>
+    <div class="card">
+      <div class="card-title">Limitations & Future Roadmap</div>
+      <p style="font-size:8pt;">
+        • <strong>Limitations:</strong> Synthetic 1D corridor without multi-lane maneuvers, merging ramps, or traffic light preemption cycles; deterministic compliance modeling.<br>
+        • <strong>Real-World Channels:</strong> Integration with navigation apps (Google Maps, Waze), overhead variable message signage (VMS), and cellular geo-broadcasting.<br>
+        • <strong>Future Work:</strong> Interfacing with microscopic simulators like SUMO or CORSIM using real municipal road network GIS feeds.
+      </p>
+    </div>
+  </div>
+
+  <h2>7. Final Project Submission Checklist</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Category</th>
+        <th>Deliverable Name</th>
+        <th>File Path</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Source Code</td><td>System Baseline Configuration</td><td><code>config.py</code></td><td>✅ Verified</td></tr>
+      <tr><td>Source Code</td><td>Core Simulation Engine</td><td><code>simulator.py</code></td><td>✅ Verified</td></tr>
+      <tr><td>Source Code</td><td>Comparative Execution Script</td><td><code>main.py</code></td><td>✅ Verified</td></tr>
+      <tr><td>Source Code</td><td>Batch Experiment Sweeps</td><td><code>experiments.py</code></td><td>✅ Verified</td></tr>
+      <tr><td>Source Code</td><td>Automated Unit Test Suite</td><td><code>test_simulator.py</code></td><td>✅ Verified (11 passed)</td></tr>
+      <tr><td>Visualization</td><td>Animated Matplotlib Visualizer</td><td><code>visual_simulator.py</code></td><td>✅ Verified</td></tr>
+      <tr><td>Visualization</td><td>Standalone Web Simulation</td><td><code>index.html</code></td><td>✅ Verified</td></tr>
+      <tr><td>Deliverable</td><td>Interactive Demo Notebook</td><td><code>demo_notebook.ipynb</code></td><td>✅ Verified</td></tr>
+      <tr><td>Deliverable</td><td>Comparison & Sweep Plots</td><td><code>plots/*.png</code></td><td>✅ Verified</td></tr>
+      <tr><td>Deliverable</td><td>Data Logs & Summary</td><td><code>results/*.csv, summary.txt</code></td><td>✅ Verified</td></tr>
+      <tr><td>Deliverable</td><td>Academic Technical Report</td><td><code>report/project_report.pdf</code></td><td>✅ Verified (4 pages)</td></tr>
+      <tr><td>Deliverable</td><td>Viva Speaking Notes</td><td><code>report/viva_notes.txt</code></td><td>✅ Verified</td></tr>
+      <tr><td>Deliverable</td><td>Presentation Slide Deck</td><td><code>report/presentation.pptx</code></td><td>✅ Verified (6 slides)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+</body>
+</html>

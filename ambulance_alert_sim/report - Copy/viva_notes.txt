@@ -1,0 +1,57 @@
+================================================================================
+ADVANCE AMBULANCE-ALERT CORRIDOR SIMULATOR - VIVA NOTES
+================================================================================
+
+1. PROJECT SUMMARY & EXPLANATION (Speak for 30-45 seconds)
+--------------------------------------------------------------------------------
+Our project simulates an ambulance moving through a one-dimensional 
+traffic corridor. Traffic density varies along the corridor (linearly 
+increasing from 0.2 to 0.8 across 20 segments), and the ambulance speed 
+decreases as effective density increases (linear model: v = v_max * (1 - rho_eff)).
+
+We compare a baseline without an advance alert to a scenario where 
+drivers in a configurable horizon H ahead of the ambulance cooperate 
+with factor alpha. Cooperation reduces effective density in the alerted 
+segments ahead. The ambulance's forward movement is governed by the effective 
+density of the upcoming segment.
+
+We measure travel time and time saved, then vary H and alpha to study 
+their effect quantitatively.
+
+2. KEY EXPERIMENTAL RESULTS (Speak for 30-45 seconds)
+--------------------------------------------------------------------------------
+- Baseline (No Alert): Travel time was 45 time steps to traverse the corridor.
+- Advance Alert (Default H=3, alpha=0.5): Travel time reduced to 26 time steps, 
+  saving 19 time steps (a 42.22% reduction in transit duration).
+- Alert Horizon Sweep (H = 0 to 5):
+  * At H = 0 (no advance warning), travel time is 45 steps (0 saved).
+  * At H = 1 to 5, travel time drops to 26 steps (19 saved), proving that early 
+    warning of at least one segment ahead unlocks full corridor lane clearance.
+- Driver Cooperation Sweep (alpha = 0.0 to 1.0):
+  * At alpha = 0.0 (no driver yielding), travel time is 45 steps (0 saved).
+  * At alpha = 0.2, travel time is 34 steps (11 saved, 24.4% faster).
+  * At alpha = 0.4, travel time is 28 steps (17 saved, 37.8% faster).
+  * At alpha = 0.6, travel time is 24 steps (21 saved, 46.7% faster).
+  * At alpha = 0.8, travel time is 22 steps (23 saved, 51.1% faster).
+  * At alpha = 1.0 (perfect yielding), travel time drops to 19 steps (26 saved, 57.8% faster).
+
+3. MODEL LIMITATIONS (Speak for 20 seconds)
+--------------------------------------------------------------------------------
+The model is intentionally simplified:
+- Synthetic 1-D corridor: Does not model multi-lane maneuvers, lane changes, 
+  merging ramps, or traffic light intersection cycles.
+- Simplified driver behavior: Models cooperation factor deterministically 
+  without human behavioral delay, inattentiveness, or vehicle size variation.
+- No live traffic integration: Uses synthetic linear density rather than 
+  empirical road sensor data.
+
+4. FUTURE EXTENSIONS & REAL-WORLD MAPPING (Speak for 20 seconds)
+--------------------------------------------------------------------------------
+- Real-World Delivery Channels: Advance alerts broadcast via connected navigation 
+  apps (Google Maps / Waze), overhead Variable Message Signs (VMS), and cellular 
+  geo-broadcasting.
+- Microscopic Traffic Simulator Coupling: Integrating with SUMO (Simulation of 
+  Urban Mobility) or CORSIM using real city road networks and TraCI interfaces.
+- Multi-Vehicle Fleet Coordination: Managing multiple emergency vehicles and 
+  automated adaptive traffic signal preemption (Green Corridor systems).
+================================================================================

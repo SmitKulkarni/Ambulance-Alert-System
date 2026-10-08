@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+numpy
+pydantic
+matplotlib
+jupyter
+pytest
+reportlab
+python-pptx
