@@ -169,8 +169,6 @@ def run_v2x_simulation(req: V2XSimulationRequest):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-from acoustic_detector import default_detector
-
 class DetectionRequest(BaseModel):
     ambulance_x: float = Field(default=-100.0)
     ambulance_y: float = Field(default=0.0)
